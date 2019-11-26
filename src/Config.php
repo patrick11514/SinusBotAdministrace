@@ -9,7 +9,7 @@ $config = [
         /**
          * Database Address, without port
          */
-        "address" => "127.0.0.11",
+        "address" => "127.0.0.1",
 
         /**
          * Database Port
