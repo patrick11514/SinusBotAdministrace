@@ -9,7 +9,7 @@ $config = [
         /**
          * Database Address, without port
          */
-        "address" => "127.0.0.1",
+        "address" => "127.0.0.11",
 
         /**
          * Database Port
@@ -24,7 +24,7 @@ $config = [
         /**
          * Database Password
          */
-        "password" => "example"
+        "password" => "example",
 
     ],
 
@@ -58,7 +58,7 @@ $config = [
          * Default password of bot, if UseDP is true
          *
          */
-        "DPassword" => "example123456"
+        "DPassword" => "example123456",
 
     ]
 ];
