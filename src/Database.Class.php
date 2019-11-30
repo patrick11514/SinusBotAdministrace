@@ -21,7 +21,7 @@ class Database
             $conn = new mysqli($config["address"] . ":" . $config["port"], $config["username"], $config["password"]);
             $conn->set_charset("utf8mb4");
 
-            if( isset($conn->connect_error)) {
+            if (isset($conn->connect_error)) {
                 die("<b>MYSQLI Error:</b>" . self::errorConvert($conn->connect_error));
             }
 
@@ -39,17 +39,23 @@ class Database
             $return = "Please use valid host";
         } else if ($error == "php_network_getaddresses: getaddrinfo failed: Name or service not known") {
             $return = "Please use valid host";
+        } else if (strpost($error, "UNKNOWN DATABASE '" !== false)) {
+            $return = "Database " . explode("'", $error)[1] . " not found! Please create it";
         }
         return $return;
     }
 
-    public static function checkConnection($address, $port, $username, $password)
+    /*public static function select($params, $database, $table)
     {
 
-        $conn = new mysqli($address . ":" . $port, $username, $password);
+    }*/
+
+    public static function checkConnection($address, $port, $username, $password, $database)
+    {
+
+        $conn = new mysqli($address . ":" . $port, $username, $password, $database);
         
         $conn->set_charset("utf8mb4");
-
         if (isset($conn->connect_error)) {
             self::$error = self::errorConvert($conn->connect_error);
             return false;

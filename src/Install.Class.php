@@ -2,8 +2,6 @@
 
 namespace patrick115\Sinusbot;
 
-use mysqli;
-
 class Install extends Database
 {
 
@@ -11,7 +9,7 @@ class Install extends Database
 
     public static function validate_1($arr)
     {
-        if (empty($arr["address"]) || empty($arr["port"]) || empty($arr["username"] || empty($arr["password"]))) {
+        if (empty($arr["address"]) || empty($arr["port"]) || empty($arr["username"]) || empty($arr["password"]) || empty($arr["database"])) {
             self::$lasterror = "Please fill form";
             return false;
         } else if (!is_numeric($arr["port"])) {
@@ -84,4 +82,13 @@ class Install extends Database
         }
     }
 
+    public static function Install_bot($config)
+    {
+        $config = file_get_contents($config);
+        #unlink($config);
+        $file = fopen(__DIR__ . "/config/config.php", "w");
+        fwrite($file, $config);
+        fclose($file);
+        echo "<pre>" . $config . "</pre>";
+    }
 }

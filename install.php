@@ -52,7 +52,8 @@ if (isset($_POST["submit"])) {
                 Main::Chars($_POST["address"]),
                 Main::Chars($_POST["port"]),
                 Main::Chars($_POST["username"]),
-                Main::Chars($_POST["password"])
+                Main::Chars($_POST["password"]),
+                Main::Chars($_POST["database"])
             )) {
                 $config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
 
@@ -68,7 +69,11 @@ if (isset($_POST["submit"])) {
                             str_replace(
                                 "\"password\" => \"example\"",
                                 "\"password\" => \"" . Main::Chars($_POST["password"]) . "\"",
-                                $config
+                                str_replace(
+                                    "\"database\" => \"database\",",
+                                    "\"database\" => \"" . Main::Chars($_POST["database"]) . "\",",
+                                    $config
+                                )
                             )
                         )
                     )
@@ -121,7 +126,7 @@ if (isset($_POST["submit"])) {
                 "\"address\" => \"" . $_POST["address"] . "\",",
                 str_replace(
                     "\"username\" => \"User\",",
-                    "\"username\" => \"" . $_POST["usernmae"] . "\",",
+                    "\"username\" => \"" . $_POST["username"] . "\",",
                     str_replace(
                         "\"password\" => \"example123456\",",
                         "\"password\" => \"" . $_POST["password"] . "\",",
@@ -135,6 +140,8 @@ if (isset($_POST["submit"])) {
         } else {
             $error = Install::$lasterror;
         }
+    } else if ($part == 4) {
+        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
     }
 }
 
