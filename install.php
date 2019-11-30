@@ -19,6 +19,10 @@ if (!is_writable(__DIR__)) {
     die($error);
 }
 
+if (file_exists(__DIR__ . "/src/config/config.php")) {
+    unlink(__DIR__ . "/src/config/config.php");
+}
+
 if (empty($_GET["setup"])) {
     Main::Redirect("./install.php?setup=1");
 }
@@ -83,6 +87,7 @@ if (isset($_POST["submit"])) {
                 fclose($file);
                 Main::Redirect("./install.php?setup=2");
             } else {
+                echo "ERROR";
                 $error = Database::$error;
             }
         } else {
@@ -141,7 +146,8 @@ if (isset($_POST["submit"])) {
             $error = Install::$lasterror;
         }
     } else if ($part == 4) {
-        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+        Install::select(["test", "bagr", "gdfgdgf"], "aa", "aa");
+        #Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
     }
 }
 

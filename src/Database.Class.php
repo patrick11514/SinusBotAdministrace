@@ -31,30 +31,56 @@ class Database
 
     private static function errorConvert($error)
     {
-        if ($error == "php_network_getaddresses: getaddrinfo failed: No address associated with hostname") {
+        $uperror = $error . PHP_EOL;
+        $error = strtolower($error);
+        if ($error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
             $return = "Undefined host.";
-        } else if (strpos($error, "Access denied for user ") !== false) {
+        } else if (strpos($error, "access denied for user ") !== false) {
             $return = "Incorrect Login Data";
-        } else if ($error == "php_network_getaddresses: getaddrinfo failed: No address associated with hostname") {
+        } else if ($error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
             $return = "Please use valid host";
-        } else if ($error == "php_network_getaddresses: getaddrinfo failed: Name or service not known") {
+        } else if ($error == "php_network_getaddresses: getaddrinfo failed: name or service not known") {
             $return = "Please use valid host";
-        } else if (strpost($error, "UNKNOWN DATABASE '" !== false)) {
-            $return = "Database " . explode("'", $error)[1] . " not found! Please create it";
+        } else if (strpos($error, "unknown database") !== false) {
+            $return = "Database " . explode("'", $uperror)[1] . " not found! Please create it";
         }
         return $return;
     }
 
-    /*public static function select($params, $database, $table)
+    public static function select($params, $table, $haystack = NULL, $needle = NULL)
     {
+        $list = "`";
+        for ($i=0; $i < count($params) - 1; $i++) { 
+            $list .= $params[$i] . ", ";
+        }
+        $list .= $params[count($params) - 1];
+        if ($haystack === NULL || $needle === NULL) {
+            $command = "SELECT $list FROM `$table`";
+        } else {
+            $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle';";
+        }
+        $return = self::$conn->query($command);
+        return $return;
+    }
 
-    }*/
+    public static function execute($sql)
+    {
+        self::$conn->query($sql);
+        if (!empty(self::$conn->error)) {
+            die("<b>MYSQLI Error:</b> <i>Error while executing {$sql}</i>: " . self::$conn->error);
+        }
+    }
 
     public static function checkConnection($address, $port, $username, $password, $database)
     {
 
-        $conn = new mysqli($address . ":" . $port, $username, $password, $database);
-        
+        $conn = new mysqli($address . ":" . $port, $username, $password);
+        $conn->query("USE {$database};");
+        if (!empty($conn->error)) {
+            echo $conn->error;
+            self::$error = self::errorConvert($conn->error);
+            return false;
+        }
         $conn->set_charset("utf8mb4");
         if (isset($conn->connect_error)) {
             self::$error = self::errorConvert($conn->connect_error);
