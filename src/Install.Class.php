@@ -39,6 +39,15 @@ class Install extends Database
         return true;
     }
 
+    public static function validate_3($arr)
+    {
+        if (empty($arr["address"]) || empty($arr["username"]) || empty($arr["password"])) {
+            self::$lasterror = "Please fill form";
+            return false;
+        }
+        return true;
+    }
+
     public static function randomString($length = 10) {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);

@@ -111,6 +111,30 @@ if (isset($_POST["submit"])) {
         } else {
             $error = Install::$lasterror;
         }
+    } else if ($part == 3) {
+        if (Install::validate_3($_POST)) {
+            $config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+            unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+            $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
+            $config = str_replace(
+                "\"address\" => \"10.10.10.10\",",
+                "\"address\" => \"" . $_POST["address"] . "\",",
+                str_replace(
+                    "\"username\" => \"User\",",
+                    "\"username\" => \"" . $_POST["usernmae"] . "\",",
+                    str_replace(
+                        "\"password\" => \"example123456\",",
+                        "\"password\" => \"" . $_POST["password"] . "\",",
+                        $config
+                    )
+                )
+            );
+            fwrite($file, $config);
+            fclose($file);
+            Main::Redirect("./install.php?setup=4");
+        } else {
+            $error = Install::$lasterror;
+        }
     }
 }
 

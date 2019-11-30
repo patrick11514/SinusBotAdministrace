@@ -15,11 +15,13 @@
 $install = [
     1 => "Database",
     2 => "Bot",
-    3 => "SSH"
+    3 => "SSH",
+    4 => "Setup"
 ];
 
 $source = [
     1 => "/src/installer/part_1.html",
     2 => "/src/installer/part_2.html",
     3 => "/src/installer/part_3.html",
+    4 => "/src/installer/part_4.html"
 ];
