@@ -16,13 +16,15 @@ class Database
         if (self::$conn === NULL) {
             include __DIR__ . "/config/config.php";
 
-            $config = $cfg["database"];
+            $config = $config["Database"];
+
+            echo $config;
 
             $conn = new mysqli($config["address"] . ":" . $config["port"], $config["username"], $config["password"]);
             $conn->set_charset("utf8mb4");
 
             if (isset($conn->connect_error)) {
-                die("<b>MYSQLI Error:</b>" . self::errorConvert($conn->connect_error));
+                die("<b>MYSQLI Error: </b>" . self::errorConvert($conn->connect_error));
             }
 
             self::$conn = $conn;
@@ -49,22 +51,32 @@ class Database
 
     public static function select($params, $table, $haystack = NULL, $needle = NULL)
     {
-        $list = "`";
-        for ($i=0; $i < count($params) - 1; $i++) { 
-            $list .= $params[$i] . ", ";
+        self::Connect();
+        if (empty($params) && empty($table)) {
+            die("<b>MYSQLI Error:</b> <i>Function patrick115\Sinusbot\Database\select:</i> empty parameter.");
         }
-        $list .= $params[count($params) - 1];
-        if ($haystack === NULL || $needle === NULL) {
+        $list = "";
+        for ($i=0; $i < count($params) - 1; $i++) { 
+            $list .= "`" . $params[$i] . "`, ";
+        }
+        $list .= "`" . $params[count($params) - 1] . "`";
+        if ($haystack === NULL && $needle === NULL) {
             $command = "SELECT $list FROM `$table`";
         } else {
             $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle';";
         }
-        $return = self::$conn->query($command);
+        try {
+            $return = self::$conn->query($command);
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            die("<b>MYSQLI Error:</b> <i>Function patrick115\Sinusbot\Database\select:</i> " . $error);
+        }
         return $return;
     }
 
     public static function execute($sql)
     {
+        self::Connect();
         self::$conn->query($sql);
         if (!empty(self::$conn->error)) {
             die("<b>MYSQLI Error:</b> <i>Error while executing {$sql}</i>: " . self::$conn->error);

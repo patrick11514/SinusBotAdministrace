@@ -2,6 +2,8 @@
 
 namespace patrick115\Sinusbot;
 
+use patrick115\Sinusbot\Database;
+
 class Install extends Database
 {
 
@@ -9,7 +11,7 @@ class Install extends Database
 
     public static function validate_1($arr)
     {
-        if (empty($arr["address"]) || empty($arr["port"]) || empty($arr["username"]) || empty($arr["password"]) || empty($arr["database"])) {
+        if (empty($arr["address"]) || empty($arr["port"]) || empty($arr["username"]) || empty($arr["password"]) || empty($arr["database"]) || empty($arr["prefix"])) {
             self::$lasterror = "Please fill form";
             return false;
         } else if (!is_numeric($arr["port"])) {
@@ -89,6 +91,26 @@ class Install extends Database
         $file = fopen(__DIR__ . "/config/config.php", "w");
         fwrite($file, $config);
         fclose($file);
-        echo "<pre>" . $config . "</pre>";
+
+        include __DIR__ . "/config/config.php";
+
+        $content = file_get_contents(__DIR__ . "/installer/sql.txt");
+        $content = str_replace(
+        			"<%DATABASE%>",
+        			$config["Database"]["database"],
+        			str_replace(
+        				"<%PREFIX%>",
+        				$config["Database"]["prefix"],
+        				$content
+        			)
+        		);
+
+        $sql = explode("\n", $content);
+
+        unset($sql[(count($sql) - 1)]);
+
+        foreach ($sql as $command){
+        	Database::execute($command);
+    	}
     }
 }

@@ -1,0 +1,1 @@
+id -u sinusbot &>/dev/null || useradd --disable-login sinusbot

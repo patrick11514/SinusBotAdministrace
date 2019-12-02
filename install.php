@@ -36,6 +36,13 @@ if (empty($_SESSION["temp"])) {
     ];
     fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
     Main::Redirect("./install.php?setup=1");
+} else {
+    if (!file_exists(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt")) {
+        session_unset();
+        session_regenerate_id(true);
+        include __DIR__ . "/src/install/recreate.php";
+        Main::Redirect("./install.php?setup=1");
+    }
 }
 
 $part = Main::Chars($_GET["setup"]);
@@ -110,7 +117,11 @@ if (isset($_POST["submit"])) {
                         str_replace(
                             "\"DPassword\" => \"example123456\",",
                             "\"DPassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\",",
-                            $config
+                            str_replace(
+                                "\"prefix\" => \"sinusbot_\",",
+                                "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\",",
+                                $config
+                            )
                         )
                     )
                 )
@@ -146,8 +157,7 @@ if (isset($_POST["submit"])) {
             $error = Install::$lasterror;
         }
     } else if ($part == 4) {
-        Install::select(["test", "bagr", "gdfgdgf"], "aa", "aa");
-        #Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
     }
 }
 
