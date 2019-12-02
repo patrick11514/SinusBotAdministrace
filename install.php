@@ -83,7 +83,11 @@ if (isset($_POST["submit"])) {
                                 str_replace(
                                     "\"database\" => \"database\",",
                                     "\"database\" => \"" . Main::Chars($_POST["database"]) . "\",",
-                                    $config
+                                    str_replace(
+                                        "\"prefix\" => \"sinusbot_\",",
+                                        "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\",",
+                                        $config
+                                    )
                                 )
                             )
                         )
