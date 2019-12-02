@@ -1,1 +1,3 @@
 id -u sinusbot &>/dev/null || useradd --disable-login sinusbot
+mkdir -p {%sinusbot_dir%}
+chown -R sinusbot:sinusbot {%sinusbot_dir%}

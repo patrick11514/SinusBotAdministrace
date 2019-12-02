@@ -19,17 +19,19 @@ if (!is_writable(__DIR__)) {
     die($error);
 }
 
-if (file_exists(__DIR__ . "/src/config/config.php")) {
-    unlink(__DIR__ . "/src/config/config.php");
-}
-
 if (empty($_GET["setup"])) {
+        
+    if (file_exists(__DIR__ . "/src/config/config.php")) {
+        unlink(__DIR__ . "/src/config/config.php");
+    }
+    
     Main::Redirect("./install.php?setup=1");
+
 }
 
 if (empty($_SESSION["temp"])) {
     $_SESSION["temp"] = Install::randomString(40);
-    $_SESION["data"] = [
+    $_SESSION["data"] = [
         1 => false,
         2 => false,
         3 => false,
@@ -46,6 +48,10 @@ if (empty($_SESSION["temp"])) {
 }
 
 $part = Main::Chars($_GET["setup"]);
+
+if ($part > 1 && $_SESSION["data"][($part - 1)] === false) {
+    Main::Redirect("./install.php?setup=" . ($part - 1));
+}
 
 if (empty($source[$part]) || empty($install[$part])) {
     Main::Redirect("./install.php?setup=1");
@@ -96,6 +102,7 @@ if (isset($_POST["submit"])) {
                 $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
                 fwrite($file, $config);
                 fclose($file);
+                $_SESSION["data"][1] = true;
                 Main::Redirect("./install.php?setup=2");
             } else {
                 echo "ERROR";
@@ -132,6 +139,7 @@ if (isset($_POST["submit"])) {
             );
             fwrite($file, $config);
             fclose($file);
+            $_SESSION["data"][2] = true;
             Main::Redirect("./install.php?setup=3");
         } else {
             $error = Install::$lasterror;
@@ -156,6 +164,7 @@ if (isset($_POST["submit"])) {
             );
             fwrite($file, $config);
             fclose($file);
+            $_SESSION["data"][3] = true;
             Main::Redirect("./install.php?setup=4");
         } else {
             $error = Install::$lasterror;

@@ -2,6 +2,7 @@
 
 namespace patrick115\Sinusbot;
 
+use patrick115\Sinusbot\Config;
 use mysqli;
 
 class Database
@@ -11,20 +12,26 @@ class Database
 
     public static $error;
 
+    private static $table_prefix;
+
     protected static function Connect()
     {
         if (self::$conn === NULL) {
-            include __DIR__ . "/config/config.php";
 
-            $config = $config["Database"];
+            self::$table_prefix = Config::getConfig("Database/prefix");
 
-            echo $config;
-
-            $conn = new mysqli($config["address"] . ":" . $config["port"], $config["username"], $config["password"]);
+            $conn = new mysqli(
+                Config::getConfig("Database/address")
+                 . ":" . 
+                Config::getConfig("Database/port"), 
+                Config::getConfig("Database/username"), 
+                Config::getConfig("Database/password"), 
+                Config::getConfig("Database/database")
+            );
             $conn->set_charset("utf8mb4");
 
             if (isset($conn->connect_error)) {
-                die("<b>MYSQLI Error: </b>" . self::errorConvert($conn->connect_error));
+                die("<b>MYSQLI Error: </b><br>" . self::errorConvert($conn->connect_error));
             }
 
             self::$conn = $conn;
@@ -52,8 +59,11 @@ class Database
     public static function select($params, $table, $haystack = NULL, $needle = NULL)
     {
         self::Connect();
+
+        $table = self::$table_prefix . $table;
+
         if (empty($params) && empty($table)) {
-            die("<b>MYSQLI Error:</b> <i>Function patrick115\Sinusbot\Database\select:</i> empty parameter.");
+            die("<b>MYSQLI Error:</b><br><i>Function patrick115\Sinusbot\Database\select:</i> empty parameter.<br>");
         }
         $list = "";
         for ($i=0; $i < count($params) - 1; $i++) { 
@@ -69,7 +79,7 @@ class Database
             $return = self::$conn->query($command);
         } catch (Exception $e) {
             $error = $e->getMessage();
-            die("<b>MYSQLI Error:</b> <i>Function patrick115\Sinusbot\Database\select:</i> " . $error);
+            die("<b>MYSQLI Error:</b><br><i>Function patrick115\Sinusbot\Database\select:</i> " . $error . "<br>");
         }
         return $return;
     }
@@ -79,7 +89,7 @@ class Database
         self::Connect();
         self::$conn->query($sql);
         if (!empty(self::$conn->error)) {
-            die("<b>MYSQLI Error:</b> <i>Error while executing {$sql}</i>: " . self::$conn->error);
+            die("<b>MYSQLI Error:</b><br><i>Error while executing {$sql}</i>: " . self::$conn->error . "<br>");
         }
     }
 

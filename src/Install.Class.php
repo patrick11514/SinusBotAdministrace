@@ -3,6 +3,8 @@
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Database;
+use patrick115\Sinusbot\Config;
+use patrick115\Sinusbot\Main;
 
 class Install extends Database
 {
@@ -92,15 +94,13 @@ class Install extends Database
         fwrite($file, $config);
         fclose($file);
 
-        include __DIR__ . "/config/config.php";
-
         $content = file_get_contents(__DIR__ . "/installer/sql.txt");
         $content = str_replace(
-        			"<%DATABASE%>",
-        			$config["Database"]["database"],
+                    "<%DATABASE%>",
+                    Config::getConfig("Database/database"),
         			str_replace(
         				"<%PREFIX%>",
-        				$config["Database"]["prefix"],
+        				Config::getConfig("Database/prefix"),
         				$content
         			)
         		);
@@ -111,6 +111,23 @@ class Install extends Database
 
         foreach ($sql as $command){
         	Database::execute($command);
-    	}
+        }
+        
+        $content = file_get_contents(__DIR__ . "/installer/commands.txt");
+
+        $content = str_replace(
+                    "{%sinusbot_dir%}",
+                    Config::getConfig("Bot/folder"),
+                    $content
+                );
+        
+        $exec = explode("\n", $content);
+
+        unset($exec[(count($exec) - 1)]);
+
+        foreach ($exec as $command) {
+            Main::SSHExecute($command);
+        }
+        
     }
 }
