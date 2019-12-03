@@ -10,7 +10,9 @@ include __DIR__ . "/src/Class.php";
 
 include __DIR__ . "/src/installer/installs.php";
 
-
+if (file_exists(__DIR__ . "/installer/install-lock")) {
+    Main::Redirect("./index.php");
+}
 
 Install::checkVersion();
 
@@ -35,6 +37,7 @@ if (empty($_SESSION["temp"])) {
         1 => false,
         2 => false,
         3 => false,
+        4 => false,
     ];
     fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
     Main::Redirect("./install.php?setup=1");
@@ -167,15 +170,13 @@ if (isset($_POST["submit"])) {
         }
     } else if ($part == 4) {
     	
-        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", __DIR__);
 
-        session_unset();
-        session_destroy();
-        session_write_close();
-        setcookie(session_name(), '', 0, '/');
-        session_regenerate_id(true);
-
-        Main::Redirect("./index.php");
+        $_SESSION["data"][4] = true;
+        Main::Redirect("./install.php?setup=5");
+        echo "a";
+    } else if ($part == 5) {
+        
     }
 }
 

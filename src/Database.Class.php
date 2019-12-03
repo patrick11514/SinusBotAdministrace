@@ -4,6 +4,7 @@ namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Config;
 use mysqli;
+use Exception;
 
 class Database
 {

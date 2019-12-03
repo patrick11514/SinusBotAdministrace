@@ -51,6 +51,14 @@ class Main extends Database
         ssh2_exec($conn, $command);
     }
 
+    public static function sessDestroy($delete = true)
+    {
+        session_destroy();
+        session_write_close();
+        setcookie(session_name(), '', 0, '/');
+        session_regenerate_id($delete);
+    }
+
     public function Login($username, $password)
     {
 

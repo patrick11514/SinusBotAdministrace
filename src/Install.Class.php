@@ -16,6 +16,8 @@ namespace patrick115\Sinusbot;
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Sinusbot;
+use ZipArchive;
 
 class Install extends Database
 {
@@ -125,7 +127,12 @@ class Install extends Database
         if (!extension_loaded("gd")) {
             $errors[] = "Please install gd extension";
         }
-
+        if (!extension_loaded("zip")) {
+            $errors[] = "Please install zip extension";
+        }
+        if(!`which unzip`) {
+            $errors[] = "Please install unzip to your linux";
+        }
         if (!empty($errors)) {
             $return = "<pre>There was an error(s) checking the extensions and php version<ul>";
             foreach ($errors as $error) {
@@ -142,12 +149,17 @@ class Install extends Database
      * use.
      * 
      * @param string $config Contains temp config location
+     * @param string $dir Root directory
      * 
      */
-    public static function Install_bot($config)
+    public static function Install_bot($config, $dir)
     {
+        set_time_limit(0);
+        if (file_exists(__DIR__ . "/../sinusbot_latest.zip")) {
+            unlink(__DIR__ . "/../sinusbot_latest.zip");
+        }
         $config = file_get_contents($config);
-        #unlink($config);
+        unlink($config);
         $file = fopen(__DIR__ . "/config/config.php", "w");
         fwrite($file, $config);
         fclose($file);
@@ -170,20 +182,44 @@ class Install extends Database
         foreach ($sql as $command){
         	Database::execute($command);
         }
-        
-        $content = file_get_contents(__DIR__ . "/installer/commands.txt");
 
-        $content = str_replace(
-                    "{%sinusbot_dir%}",
-                    Config::getConfig("Bot/folder"),
-                    $content
-                );
-        
-        $exec = explode(";", $content);
+        exec("wget https://proxy.patrick115.eu/bot/sinusbot_latest.zip");
 
-        unset($exec[(count($exec) - 1)]);
+        $zip = new ZipArchive();
+
+        $check = $zip->open(__DIR__ . "/../sinusbot_latest.zip");
+
+        if ($check === false) {
+            die("<b>Zip Error:</b><br>Can't open file " . __DIR__ . "/../sinusbot_latest.zip");
+        }
+        $zip->extractTo(__DIR__ . "/../");
+        $zip->close();
+
+        unlink(__DIR__ . "/../sinusbot_latest.zip");
+
+        $exec = [];
+
+        // Preparing commands
+
+        $sdir = Config::getConfig("Bot/folder");
+
+        $exec[] = "id -u sinusbot &>/dev/null || useradd --disable-login sinusbot";
+        $exec[] = "mkdir -p {$sdir}";
+        $exec[] = "chown -R sinusbot:sinusbot {$sdir}";
+        $exec[] = "apt-get update";
+        $exec[] = "apt-get install -y x11vnc xvfb libxcursor1 ca-certificates bzip2 libnss3 libegl1-mesa x11-xkb-utils libasound2 libpci3 libxslt1.1 libxkbcommon0 libxss1 curl";
+        $exec[] = "update-ca-certificates";
+        $exec[] = "apt-get install libglib2.0-0";
+        $exec[] = "add-apt-repository universe";
+        $exec[] = "apt-get update";
+        $exec[] = "cp -r {$dir}/__Install__ {$sdir}/__DEFAULT__";
+        $exec[] = "rm -rf {$dir}/__Install__";
+        $exec[] = "chown -R sinusbot:sinusbot {$sdir}";
+
+        // -----------
 
         foreach ($exec as $command) {
+            echo "SSH executing: " . $command . "<br>";
             Main::SSHExecute($command);
         }
         
