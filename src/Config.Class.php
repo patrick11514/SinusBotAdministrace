@@ -13,6 +13,9 @@ class Config {
     private static function loadConfig()
     {
         if (self::$config === NULL) {
+        	if (!file_exists(__DIR__ . "/config/config.php")) {
+        		die("<b>Config Errror:</b><br><i>While loading config:</i> Config file not found.");
+        	}
             include self::$configDir;
             self::$config = $config;
         }

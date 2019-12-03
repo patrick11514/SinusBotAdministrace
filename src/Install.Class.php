@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Installation class for sinusbot
+ * 
+ * @author    patrick115 <info@patrick115.eu>
+ * @copyright ©2019
+ * @link      https://patrick115.eu
+ * @link      https://github.com/patrick11514
+ * @version   0.1.0
+ * 
+ */
+
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Database;
@@ -8,9 +19,21 @@ use patrick115\Sinusbot\Main;
 
 class Install extends Database
 {
-
+	/**
+     * Contains last error
+     * 
+     * @var string
+     */
     public static $lasterror;
 
+
+
+    /**
+     * Validate form inputs from 1st part
+     * 
+     * @param object $arr Contains $_POST informations
+     * 
+     */
     public static function validate_1($arr)
     {
         if (empty($arr["address"]) || empty($arr["port"]) || empty($arr["username"]) || empty($arr["password"]) || empty($arr["database"]) || empty($arr["prefix"])) {
@@ -23,6 +46,14 @@ class Install extends Database
         return true;
     }
 
+
+
+    /**
+     * Validate form inputs from 2nd part
+     * 
+     * @param object $arr Contains $_POST informations
+     * 
+     */
     public static function validate_2($arr)
     {
         if (empty($arr["D_Port"]) || empty($arr["Folder"]) || empty($arr["UseDP"])) {
@@ -41,6 +72,13 @@ class Install extends Database
         return true;
     }
 
+
+    /**
+     * Validate form inputs from 3rd part
+     * 
+     * @param object $arr Contains $_POST informations
+     * 
+     */
     public static function validate_3($arr)
     {
         if (empty($arr["address"]) || empty($arr["username"]) || empty($arr["password"])) {
@@ -50,6 +88,13 @@ class Install extends Database
         return true;
     }
 
+
+    /**
+     * Generate random string
+     * 
+     * @param int $length Length of random string
+     * 
+     */
     public static function randomString($length = 10) {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
@@ -60,6 +105,11 @@ class Install extends Database
         return $randomString;
     }
 
+
+    /**
+     * Check compatibility
+     * 
+     */
     public static function checkVersion()
     {
         $errors = array();
@@ -86,6 +136,14 @@ class Install extends Database
         }
     }
 
+
+    /**
+     * Install and prepare administration for
+     * use.
+     * 
+     * @param string $config Contains temp config location
+     * 
+     */
     public static function Install_bot($config)
     {
         $config = file_get_contents($config);
@@ -121,7 +179,7 @@ class Install extends Database
                     $content
                 );
         
-        $exec = explode("\n", $content);
+        $exec = explode(";", $content);
 
         unset($exec[(count($exec) - 1)]);
 

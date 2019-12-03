@@ -117,22 +117,18 @@ if (isset($_POST["submit"])) {
             unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
             $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
             $config = str_replace(
-                "\"D_Port\" => 9987,",
-                "\"D_Port\" => " . Main::Chars($_POST["D_Port"]) . ",",
+                "\"d_port\" => 9987,",
+                "\"d_port\" => " . Main::Chars($_POST["D_Port"]) . ",",
                 str_replace(
-                    "\"Folder\" => \"/opt\",",
-                    "\"Folder\" => \"" . Main::Chars($_POST["Folder"]) . "\",",
+                    "\"folder\" => \"/opt\",",
+                    "\"folder\" => \"" . Main::Chars($_POST["Folder"]) . "\",",
                     str_replace(
-                        "\"UseDP\" => true,",
-                        "\"UseDP\" => " . Main::Chars($_POST["UseDP"]) . ",",
+                        "\"usedp\" => true,",
+                        "\"usedp\" => " . Main::Chars($_POST["UseDP"]) . ",",
                         str_replace(
-                            "\"DPassword\" => \"example123456\",",
-                            "\"DPassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\",",
-                            str_replace(
-                                "\"prefix\" => \"sinusbot_\",",
-                                "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\",",
-                                $config
-                            )
+                            "\"dpassword\" => \"example123456\",",
+                            "\"dpassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\",",
+                            $config
                         )
                     )
                 )
@@ -170,7 +166,16 @@ if (isset($_POST["submit"])) {
             $error = Install::$lasterror;
         }
     } else if ($part == 4) {
+    	
         Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+
+        session_unset();
+        session_destroy();
+        session_write_close();
+        setcookie(session_name(), '', 0, '/');
+        session_regenerate_id(true);
+
+        Main::Redirect("./index.php");
     }
 }
 
