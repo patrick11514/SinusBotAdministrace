@@ -1,8 +1,15 @@
 <?php
 
+@ini_set ('zlib.output_compression', 0);
+@ini_set ('implicit_flush', 1);
+@ob_end_clean ();
+set_time_limit (0);
+ob_implicit_flush(1);
+
 session_start();
 
 use patrick115\Sinusbot\Database;
+use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Install;
 use patrick115\Sinusbot\Main;
 
@@ -38,6 +45,7 @@ if (empty($_SESSION["temp"])) {
         2 => false,
         3 => false,
         4 => false,
+        5 => false,
     ];
     fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
     Main::Redirect("./install.php?setup=1");
@@ -75,40 +83,60 @@ if (isset($_POST["submit"])) {
                 Main::Chars($_POST["password"]),
                 Main::Chars($_POST["database"])
             )) {
-                $config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
 
-                $config = str_replace(
-                    "\"address\" => \"127.0.0.1\",",
-                    "\"address\" => \"" . Main::Chars($_POST["address"]) . "\",",
-                    str_replace(
+                $connection = new mysqli(
+                    Main::Chars($_POST["address"]) . ":" . 
+                    Main::Chars($_POST["port"]),
+                    Main::Chars($_POST["username"]),
+                    Main::Chars($_POST["password"]),
+                    Main::Chars($_POST["database"]));
+                
+                $tables = $connection->query("SHOW TABLES;");
+
+                $tbl = false;
+
+                while ($row = $tables->fetch_assoc()) {
+                    $tbl = true;
+                }
+
+                if ($tbl === false) {
+
+                    $_SESSION["data"]["database"] = [
+                        "address" => Main::Chars($_POST["address"]),
+                        "port" => Main::Chars($_POST["port"]),
+                        "username" => Main::Chars($_POST["username"]),
+                        "password" => Main::Chars($_POST["password"]),
+                        "database" => Main::Chars($_POST["database"]),
+                        "prefix" => Main::Chars($_POST["prefix"])
+                    ];
+
+                    /*$config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
+
+                    $config = str_replace([
+                        "\"address\" => \"127.0.0.1\",",
                         "\"port\" => 3306,",
+                        "\"username\" => \"user\",",
+                        "\"password\" => \"example\"",
+                        "\"database\" => \"database\",",
+                        "\"prefix\" => \"sinusbot_\","
+                    ], [
+                        "\"address\" => \"" . Main::Chars($_POST["address"]) . "\",",
                         "\"port\" => " . Main::Chars($_POST["port"]) . ",",
-                        str_replace(
-                            "\"username\" => \"user\",",
-                            "\"username\" => \"" . Main::Chars($_POST["username"]) . "\",",
-                            str_replace(
-                                "\"password\" => \"example\"",
-                                "\"password\" => \"" . Main::Chars($_POST["password"]) . "\"",
-                                str_replace(
-                                    "\"database\" => \"database\",",
-                                    "\"database\" => \"" . Main::Chars($_POST["database"]) . "\",",
-                                    str_replace(
-                                        "\"prefix\" => \"sinusbot_\",",
-                                        "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\",",
-                                        $config
-                                    )
-                                )
-                            )
-                        )
-                    )
-                );
-                $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-                fwrite($file, $config);
-                fclose($file);
-                $_SESSION["data"][1] = true;
-                Main::Redirect("./install.php?setup=2");
+                        "\"username\" => \"" . Main::Chars($_POST["username"]) . "\",",
+                        "\"password\" => \"" . Main::Chars($_POST["password"]) . "\"",
+                        "\"database\" => \"" . Main::Chars($_POST["database"]) . "\",",
+                        "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\","
+                    ],
+                    $config);
+                    $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
+                    fwrite($file, $config);
+                    fclose($file);*/
+                    $_SESSION["data"][1] = true;
+                    Main::Redirect("./install.php?setup=2");
+                } else {
+                    $error = "Database contains some tables, please remove them.";
+                }   
             } else {
-                echo "ERROR";
                 $error = Database::$error;
             }
         } else {
@@ -116,28 +144,32 @@ if (isset($_POST["submit"])) {
         }
     } else if ($part == 2) {
         if (Install::validate_2($_POST)) {
-            $config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+
+
+            $_SESSION["data"]["bot"] = [
+                "d_port" => Main::Chars($_POST["D_Port"]),
+                "folder" => Main::Chars($_POST["Folder"]),
+                "usedp" => Main::Chars($_POST["UseDP"]),
+                "dpassword" => Main::Chars($_POST["DPassword"])
+            ];
+            /*$config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
             unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
             $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-            $config = str_replace(
+            $config = str_replace([
                 "\"d_port\" => 9987,",
+                "\"folder\" => \"/opt\",",
+                "\"usedp\" => true,",
+                "\"dpassword\" => \"example123456\","
+            ], [
                 "\"d_port\" => " . Main::Chars($_POST["D_Port"]) . ",",
-                str_replace(
-                    "\"folder\" => \"/opt\",",
-                    "\"folder\" => \"" . Main::Chars($_POST["Folder"]) . "\",",
-                    str_replace(
-                        "\"usedp\" => true,",
-                        "\"usedp\" => " . Main::Chars($_POST["UseDP"]) . ",",
-                        str_replace(
-                            "\"dpassword\" => \"example123456\",",
-                            "\"dpassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\",",
-                            $config
-                        )
-                    )
-                )
-            );
+                "\"folder\" => \"" . Main::Chars($_POST["Folder"]) . "\",",
+                "\"usedp\" => " . Main::Chars($_POST["UseDP"]) . ",",
+                "\"dpassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\","
+            ],
+            $config);
+
             fwrite($file, $config);
-            fclose($file);
+            fclose($file);*/
             $_SESSION["data"][2] = true;
             Main::Redirect("./install.php?setup=3");
         } else {
@@ -145,45 +177,116 @@ if (isset($_POST["submit"])) {
         }
     } else if ($part == 3) {
         if (Install::validate_3($_POST)) {
-            $config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
+            $_SESSION["data"]["ssh"] = [
+                "address" => Main::Chars($_POST["address"]),
+                "username" => Main::Chars($_POST["username"]),
+                "password" => Main::Chars($_POST["password"])
+            ];
+            /*$config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
             unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
             $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-            $config = str_replace(
+            $config = str_replace([
                 "\"address\" => \"10.10.10.10\",",
+                "\"username\" => \"User\",",
+                "\"password\" => \"example123456\","
+            ], [
                 "\"address\" => \"" . $_POST["address"] . "\",",
-                str_replace(
-                    "\"username\" => \"User\",",
-                    "\"username\" => \"" . $_POST["username"] . "\",",
-                    str_replace(
-                        "\"password\" => \"example123456\",",
-                        "\"password\" => \"" . $_POST["password"] . "\",",
-                        $config
-                    )
-                )
-            );
+                "\"username\" => \"" . $_POST["username"] . "\",",
+                "\"password\" => \"" . $_POST["password"] . "\","
+            ],
+            $config);
+
             fwrite($file, $config);
-            fclose($file);
+            fclose($file);*/
             $_SESSION["data"][3] = true;
             Main::Redirect("./install.php?setup=4");
         } else {
             $error = Install::$lasterror;
         }
     } else if ($part == 4) {
-    	
-        Install::Install_bot(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", __DIR__);
+        if (Install::validate_5($_POST)) {
+            $_SESSION["data"]["user"] = [
+                "username" => Main::Chars($_POST["username"]),
+                "password" => Main::Chars($_POST["password"])
+            ];
 
-        $_SESSION["data"][4] = true;
-        Main::Redirect("./install.php?setup=5");
-        echo "a";
+            # Prepare config
+            $config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
+
+            $config = str_replace([
+                #Database Block
+                "\"address\" => \"127.0.0.1\",",
+                "\"port\" => 3306,",
+                "\"username\" => \"user\",",
+                "\"password\" => \"example\"",
+                "\"database\" => \"database\",",
+                "\"prefix\" => \"sinusbot_\",",
+
+                #Bot Block
+                "\"d_port\" => 9987,",
+                "\"folder\" => \"/opt\",",
+                "\"usedp\" => true,",
+                "\"dpassword\" => \"example123456\",",
+
+                #SSH Block
+                "\"address\" => \"10.10.10.10\",",
+                "\"username\" => \"User\",",
+                "\"password\" => \"example123456\","
+            ], [
+                #Database Block
+                "\"address\" => \"" . $_SESSION["data"]["database"]["address"] . "\",",
+                "\"port\" => " . $_SESSION["data"]["database"]["port"] . ",",
+                "\"username\" => \"" . $_SESSION["data"]["database"]["username"] . "\",",
+                "\"password\" => \"" . $_SESSION["data"]["database"]["password"] . "\"",
+                "\"database\" => \"" . $_SESSION["data"]["database"]["database"] . "\",",
+                "\"prefix\" => \"" . $_SESSION["data"]["database"]["prefix"] . "\",",
+
+                #Bot Block
+                "\"d_port\" => " . $_SESSION["data"]["bot"]["d_port"] . ",",
+                "\"folder\" => \"" . $_SESSION["data"]["bot"]["folder"] . "\",",
+                "\"usedp\" => " . $_SESSION["data"]["bot"]["usedp"] . ",",
+                "\"dpassword\" => \"" . $_SESSION["data"]["bot"]["dpassword"] . "\",",
+
+                #SSH Block
+                "\"address\" => \"" . $_SESSION["data"]["ssh"]["address"] . "\",",
+                "\"username\" => \"" . $_SESSION["data"]["ssh"]["username"] . "\",",
+                "\"password\" => \"" . $_SESSION["data"]["ssh"]["password"] . "\","
+            ],
+                $config
+            );
+            #-----
+
+            $file = fopen(__DIR__ . "/src/config/config.php", "w");
+            fwrite($file, $config);
+            fclose($file);
+
+            $_SESSION["data"][4] = true;
+            Main::Redirect("./install.php?setup=5");
+        } else {
+            $error = Install::$lasterror;
+        }
     } else if ($part == 5) {
-        
+
+        $_SESSION["data"][5] = true;
+        Main::Redirect("./install.php?setup=6");
+  
     }
+    
 }
 
+
+ob_flush();
+flush();
+if ($part == "6") {
+    echo "<pre id=\"install\">Status:<br><div id=\"log\"></div></pre><script src=\"https://code.jquery.com/jquery-3.4.1.min.js\" integrity=\"sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=\" crossorigin=\"anonymous\"></script>";
+    Install::Install_bot(__DIR__);
+}
+
+
+Error::returnError();
+
 ?>
-<pre>
-    <?php print_r($_POST);?>
-</pre>
+
 <!DOCTYPE HTML>
 <!--
 	Identity by HTML5 UP
@@ -221,7 +324,7 @@ if (isset($_POST["submit"])) {
         <!-- Footer -->
         <footer id="footer">
             <ul class="copyright">
-                <li>&copy;<?=date("Y")?> <a class="icon brands fa-github"></a><a target="_blank" href="https://github.com/patrick11514">patrick115</a></li>
+                <li>&copy;<?php $release = (int) 2019; if((int) date("Y") > $release){ echo $release . "-" . date("Y");} else {echo date("Y");} ?> <a class="icon brands fa-github"></a><a target="_blank" href="https://github.com/patrick11514">patrick115</a></li>
                 </li>
             </ul>
             <ul class="copyright">
@@ -241,7 +344,6 @@ if (isset($_POST["submit"])) {
         document.body.className += (navigator.userAgent.match(/(MSIE|rv:11\.0)/) ? ' is-ie' : '');
     }
     </script>
-
 </body>
 
 </html>

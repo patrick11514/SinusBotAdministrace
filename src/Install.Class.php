@@ -45,6 +45,7 @@ class Install extends Database
             self::$lasterror = "Port must be numeric";
             return false;
         }
+
         return true;
     }
 
@@ -84,6 +85,21 @@ class Install extends Database
     public static function validate_3($arr)
     {
         if (empty($arr["address"]) || empty($arr["username"]) || empty($arr["password"])) {
+            self::$lasterror = "Please fill form";
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validate form inputs from 5th part
+     * 
+     * @param object $arr Contains $_POST informations
+     * 
+     */
+    public static function validate_5($arr)
+    {
+        if (empty($arr["username"]) || empty($arr["password"])) {
             self::$lasterror = "Please fill form";
             return false;
         }
@@ -130,8 +146,11 @@ class Install extends Database
         if (!extension_loaded("zip")) {
             $errors[] = "Please install zip extension";
         }
-        if(!`which unzip`) {
+        if (!`which unzip`) {
             $errors[] = "Please install unzip to your linux";
+        }
+        if (!extension_loaded("SPL")) {
+            $errors[] = "Please install SPL extension";
         }
         if (!empty($errors)) {
             $return = "<pre>There was an error(s) checking the extensions and php version<ul>";
@@ -152,18 +171,16 @@ class Install extends Database
      * @param string $dir Root directory
      * 
      */
-    public static function Install_bot($config, $dir)
+    public static function Install_bot($dir)
     {
-        set_time_limit(0);
+
         if (file_exists(__DIR__ . "/../sinusbot_latest.zip")) {
             unlink(__DIR__ . "/../sinusbot_latest.zip");
         }
-        $config = file_get_contents($config);
-        unlink($config);
-        $file = fopen(__DIR__ . "/config/config.php", "w");
-        fwrite($file, $config);
-        fclose($file);
-
+        echo "<script>$(\"#log\").text(\"Prepairing SQL..\");</script>";
+        ob_flush();
+        flush();
+        usleep(1000);
         $content = file_get_contents(__DIR__ . "/installer/sql.txt");
         $content = str_replace(
                     "<%DATABASE%>",
@@ -178,20 +195,33 @@ class Install extends Database
         $sql = explode("\n", $content);
 
         unset($sql[(count($sql) - 1)]);
-
+        $i = 0;
         foreach ($sql as $command){
+            $i++;
+            echo "<script>$(\"#log\").text(\"Executing SQL commands ({$i})\");</script>";
+            ob_flush();
+            flush();
+            usleep(1000);
         	Database::execute($command);
         }
-
+        echo "<script>$(\"#log\").text(\"Downloading sinusbot_latest.zip...\");</script>";
+        ob_flush();
+        flush();
+        usleep(1000);
         exec("wget https://proxy.patrick115.eu/bot/sinusbot_latest.zip");
 
         $zip = new ZipArchive();
 
         $check = $zip->open(__DIR__ . "/../sinusbot_latest.zip");
 
-        if ($check === false) {
-            die("<b>Zip Error:</b><br>Can't open file " . __DIR__ . "/../sinusbot_latest.zip");
+        if ($check !== true) {
+            parent::catchError("Can't open file " . __DIR__ . "/../sinusbot_latest.zip", debug_backtrace());
+            echo "aaa";
         }
+        echo "<script>$(\"#log\").text(\"Extracting sinusbot_latest.zip...\");</script>";
+        usleep(1000);
+        ob_flush();
+        flush();
         $zip->extractTo(__DIR__ . "/../");
         $zip->close();
 
@@ -217,11 +247,20 @@ class Install extends Database
         $exec[] = "chown -R sinusbot:sinusbot {$sdir}";
 
         // -----------
-
+        $i = 0;
         foreach ($exec as $command) {
-            echo "SSH executing: " . $command . "<br>";
+            $i++;
+            echo "<script>$(\"#log\").text(\"Executing SSH commands ({$i})\");</script>";
+            usleep(1000);
+            ob_flush();
+            flush();
             Main::SSHExecute($command);
         }
-        
+        Main::createUser($_SESSION["data"]["user"]["username"], $_SESSION["data"]["user"]["password"], Main::getUserIP());
+
+        echo "<script>$(\"#log\").text(\"Done\");</script>";
+        ob_flush();
+        flush();
+        usleep(1000);
     }
 }

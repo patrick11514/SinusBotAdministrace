@@ -16,8 +16,9 @@ $install = [
     1 => "Database",
     2 => "Bot",
     3 => "SSH",
-    4 => "Setup",
-    5 => "New User"
+    4 => "New User",
+    5 => "Install sinusbot",
+    6 => "Finished"
 ];
 
 $source = [
@@ -26,4 +27,5 @@ $source = [
     3 => "/src/installer/part_3.html",
     4 => "/src/installer/part_4.html",
     5 => "/src/installer/part_5.html",
+    6 => "/src/installer/part_6.html",
 ];

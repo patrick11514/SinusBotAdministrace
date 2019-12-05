@@ -2,11 +2,12 @@
 
 namespace patrick115\Sinusbot;
 
+use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Config;
 use mysqli;
 use Exception;
 
-class Database
+class Database extends Error
 {
 
     private static $conn = NULL;
@@ -32,7 +33,7 @@ class Database
             $conn->set_charset("utf8mb4");
 
             if (isset($conn->connect_error)) {
-                die("<b>MYSQLI Error: </b><br>" . self::errorConvert($conn->connect_error));
+                parent::catchError(self::errorConvert($conn->connect_error), debug_backtrace());
             }
 
             self::$conn = $conn;
@@ -57,14 +58,14 @@ class Database
         return $return;
     }
 
-    public static function select($params, $table, $haystack = NULL, $needle = NULL)
+    public static function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
     {
         self::Connect();
 
-        $table = self::$table_prefix . $table;
+        $table = self::convertTableName($table);
 
-        if (empty($params) && empty($table)) {
-            die("<b>MYSQLI Error:</b><br><i>Function patrick115\Sinusbot\Database\select:</i> empty parameter.<br>");
+        if (empty($params) || empty($table)) {
+            parent::catchError("Empty parameter(s).", debug_backtrace());
         }
         $list = "";
         for ($i=0; $i < count($params) - 1; $i++) { 
@@ -72,25 +73,28 @@ class Database
         }
         $list .= "`" . $params[count($params) - 1] . "`";
         if ($haystack === NULL && $needle === NULL) {
-            $command = "SELECT $list FROM `$table`";
+            $command = "SELECT $list FROM `$table` $options";
         } else {
-            $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle';";
+            $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle' $options"; 
         }
         try {
             $return = self::$conn->query($command);
         } catch (Exception $e) {
             $error = $e->getMessage();
-            die("<b>MYSQLI Error:</b><br><i>Function patrick115\Sinusbot\Database\select:</i> " . $error . "<br>");
+            parent::catchError($error, debug_backtrace());
         }
         return $return;
     }
 
-    public static function execute($sql)
+    public static function execute($sql, $return = false)
     {
         self::Connect();
-        self::$conn->query($sql);
+        $return = self::$conn->query($sql);
         if (!empty(self::$conn->error)) {
-            die("<b>MYSQLI Error:</b><br><i>Error while executing {$sql}</i>: " . self::$conn->error . "<br>");
+            parent::catchError(self::$conn->error, debug_backtrace());
+        }
+        if ($return === true) {
+            return $return;
         }
     }
 
@@ -110,5 +114,14 @@ class Database
             return false;
         }
         return true;
+    }
+
+    public static function convertTableName($table)
+    {
+        if (strpos($table, Config::getConfig("Database/prefix")) === false) {
+            return Config::getConfig("Database/prefix") . $table;
+        } else {
+            parent::catchError("Converted table, contains table prefix.", debug_backtrace());
+        }
     }
 }

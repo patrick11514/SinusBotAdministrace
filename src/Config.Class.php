@@ -2,7 +2,10 @@
 
 namespace patrick115\Sinusbot;
 
-class Config {
+use patrick115\Sinusbot\Error;
+
+class Config extends Error
+{
 
     private static $config = NULL;
 
@@ -14,7 +17,7 @@ class Config {
     {
         if (self::$config === NULL) {
         	if (!file_exists(__DIR__ . "/config/config.php")) {
-        		die("<b>Config Errror:</b><br><i>While loading config:</i> Config file not found.");
+                parent::catchError("Config file not found.", debug_backtrace());
         	}
             include self::$configDir;
             self::$config = $config;
@@ -36,7 +39,7 @@ class Config {
 
         for ($i=0; $i < count($part); $i++) { 
             if (empty($return[$part[$i]])) {
-                die("<b>Config Errror:</b><br><i>While reading {$path}: </i> Can't find value in config!<br>");
+                parent::catchError("Can't find {$path} in config!", debug_backtrace());
             }
             $return = $return[$part[$i]];
         }
