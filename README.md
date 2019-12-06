@@ -1,2 +1,2 @@
 # SinusBotAdministrace
-jQuerry
+jQuery - https://github.com/jquery/jquery
