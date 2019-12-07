@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Main class for sinusbot
+ * 
+ * @author    patrick115 <info@patrick115.eu>
+ * @copyright ©2019
+ * @link      https://patrick115.eu
+ * @link      https://github.com/patrick11514
+ * @version   0.1.0
+ * 
+ */
+
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Error;
@@ -7,10 +18,24 @@ use patrick115\Sinusbot\Error;
 class Config extends Error
 {
 
+    /**
+     * Config values
+     * 
+     * @var array
+     */
     private static $config = NULL;
 
+    /**
+     * Config directory
+     * 
+     * @var string
+     */
     private static $configDir = __DIR__ . "/config/config.php";
 
+    /**
+     * Prevence to construct this function
+     * 
+     */
     private function __construct() {}
 
     private static function loadConfig()
@@ -25,6 +50,11 @@ class Config extends Error
         return self::$config;
     }
 
+    /**
+     * Get config value
+     * 
+     * @var string $path Get path from config
+     */
     public static function getConfig($path)
     {
         $config = self::loadConfig();
@@ -35,14 +65,12 @@ class Config extends Error
             return $config[$path];
         }
 
-        $return = $config;
-
         for ($i=0; $i < count($part); $i++) { 
-            if (empty($return[$part[$i]])) {
+            if (empty($config[$part[$i]])) {
                 parent::catchError("Can't find {$path} in config!", debug_backtrace());
             }
-            $return = $return[$part[$i]];
+            $config = $config[$part[$i]];
         }
-        return $return;
+        return $config;
     }
 }

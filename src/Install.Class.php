@@ -179,9 +179,7 @@ class Install extends Database
         //-----------------------------
 
         echo "<script>$(\"#log\").text(\"Prepairing SQL..\");</script>";
-        ob_flush();
-        flush();
-        usleep(1000);
+        
         $content = file_get_contents(__DIR__ . "/installer/sql.txt");
         $content = str_replace([
                         "<%DATABASE%>",
@@ -203,25 +201,19 @@ class Install extends Database
         foreach ($sql as $command){
             $i++;
             echo "<script>$(\"#log\").text(\"Executing SQL commands ({$i})\");</script>";
-            ob_flush();
-            flush();
-            usleep(1000);
+    
         	Database::execute($command);
         }
 
         //-------------------------
 
         echo "<script>$(\"#log\").text(\"Downloading sinusbot_latest.zip...\");</script>";
-        ob_flush();
-        flush();
-        usleep(1000);
+        
         exec("wget https://proxy.patrick115.eu/bot/sinusbot_latest.zip");
 
         //--------------------
         echo "<script>$(\"#log\").text(\"Extracting sinusbot_latest.zip...\");</script>";
-        usleep(1000);
-        ob_flush();
-        flush();
+        
 
         $zip = new ZipArchive();
 
@@ -238,9 +230,7 @@ class Install extends Database
         //--------------------------------
 
         echo "<script>$(\"#log\").text(\"Deleting sinusbot_latest.zip\");</script>";
-        usleep(1000);
-        ob_flush();
-        flush();
+        
 
         unlink(__DIR__ . "/../sinusbot_latest.zip");
 
@@ -250,9 +240,7 @@ class Install extends Database
         // Preparing commands
 
         echo "<script>$(\"#log\").text(\"Prepairing SSH commands..\");</script>";
-        usleep(1000);
-        ob_flush();
-        flush();
+        
 
         $sdir = Config::getConfig("Bot/folder");
 
@@ -274,27 +262,21 @@ class Install extends Database
         foreach ($exec as $command) {
             $i++;
             echo "<script>$(\"#log\").text(\"Executing SSH commands ({$i})\");</script>";
-            usleep(1000);
-            ob_flush();
-            flush();
+
             Main::SSHExecute($command);
         }
 
         //------------------------
 
         echo "<script>$(\"#log\").text(\"Creating new user..\");</script>";
-        usleep(1000);
-        ob_flush();
-        flush();
+        
 
         Main::createUser($_SESSION["data"]["user"]["username"], $_SESSION["data"]["user"]["password"], Main::getUserIP());
 
         //-----------------------------
 
         echo "<script>$(\"#log\").text(\"Cleaning temp files...\");</script>";
-        ob_flush();
-        flush();
-        usleep(1000);
+        
         
         foreach (glob(__DIR__ . "/../temp_*.txt") as $file) {
             unlink($file);
@@ -307,8 +289,6 @@ class Install extends Database
         fclose($file);
 
         echo "<script>$(\"#log\").text(\"Done\");</script>";
-        ob_flush();
-        flush();
-        usleep(1000);
+        
     }
 }

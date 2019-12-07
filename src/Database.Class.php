@@ -15,6 +15,7 @@ namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Config;
+use patrick115\Sinusbot\Main;
 use mysqli;
 use Exception;
 
@@ -116,10 +117,13 @@ class Database extends Error
     }
 
     /**
-     * Select
+     * Select rows from table
      * 
-     * @param string $e Error message
-     * @param object $dump Informations about error
+     * @param array $param Selected rows
+     * @param string $table Table
+     * @param string $option Option like LIMIT 1..
+     * @param string $haystack 
+     * @param string $needle
      * 
      */
     public static function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
@@ -150,10 +154,17 @@ class Database extends Error
         return $return;
     }
 
+    /**
+     * Execute sql command
+     * 
+     * @param string $sql Sql command
+     * @param boolean $return return result
+     * 
+     */
     public static function execute($sql, $return = false)
     {
         self::Connect();
-        $return = self::$conn->query($sql);
+        $return = self::$conn->query(Main::Chars($sql));
         if (!empty(self::$conn->error)) {
             parent::catchError(self::$conn->error, debug_backtrace());
         }
@@ -162,6 +173,16 @@ class Database extends Error
         }
     }
 
+    /**
+     * Check database connection
+     * 
+     * @param string $address  Address
+     * @param int    $port     Port
+     * @param string $username Username
+     * @param string $password Password
+     * @param string $database Database
+     * 
+     */
     public static function checkConnection($address, $port, $username, $password, $database)
     {
 
@@ -180,6 +201,12 @@ class Database extends Error
         return true;
     }
 
+    /**
+     * Add table prefix to table
+     * 
+     * @param string $table Table
+     * 
+     */
     public static function convertTableName($table)
     {
         if (strpos($table, Config::getConfig("Database/prefix")) === false) {
