@@ -1,9 +1,9 @@
 <?php
 
-@ini_set ('zlib.output_compression', 0);
-@ini_set ('implicit_flush', 1);
-@ob_end_clean ();
-set_time_limit (0);
+ini_set('zlib.output_compression', 0);
+ini_set('implicit_flush', 1);
+ob_end_clean();
+set_time_limit(0);
 ob_implicit_flush(1);
 
 session_start();
@@ -17,7 +17,7 @@ include __DIR__ . "/src/Class.php";
 
 include __DIR__ . "/src/installer/installs.php";
 
-if (file_exists(__DIR__ . "/installer/install-lock")) {
+if (file_exists(__DIR__ . "/src/installer/install.lock")) {
     Main::Redirect("./index.php");
 }
 
@@ -110,27 +110,6 @@ if (isset($_POST["submit"])) {
                         "prefix" => Main::Chars($_POST["prefix"])
                     ];
 
-                    /*$config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
-
-                    $config = str_replace([
-                        "\"address\" => \"127.0.0.1\",",
-                        "\"port\" => 3306,",
-                        "\"username\" => \"user\",",
-                        "\"password\" => \"example\"",
-                        "\"database\" => \"database\",",
-                        "\"prefix\" => \"sinusbot_\","
-                    ], [
-                        "\"address\" => \"" . Main::Chars($_POST["address"]) . "\",",
-                        "\"port\" => " . Main::Chars($_POST["port"]) . ",",
-                        "\"username\" => \"" . Main::Chars($_POST["username"]) . "\",",
-                        "\"password\" => \"" . Main::Chars($_POST["password"]) . "\"",
-                        "\"database\" => \"" . Main::Chars($_POST["database"]) . "\",",
-                        "\"prefix\" => \"" . Main::Chars($_POST["prefix"]) . "\","
-                    ],
-                    $config);
-                    $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-                    fwrite($file, $config);
-                    fclose($file);*/
                     $_SESSION["data"][1] = true;
                     Main::Redirect("./install.php?setup=2");
                 } else {
@@ -152,24 +131,7 @@ if (isset($_POST["submit"])) {
                 "usedp" => Main::Chars($_POST["UseDP"]),
                 "dpassword" => Main::Chars($_POST["DPassword"])
             ];
-            /*$config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
-            unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
-            $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-            $config = str_replace([
-                "\"d_port\" => 9987,",
-                "\"folder\" => \"/opt\",",
-                "\"usedp\" => true,",
-                "\"dpassword\" => \"example123456\","
-            ], [
-                "\"d_port\" => " . Main::Chars($_POST["D_Port"]) . ",",
-                "\"folder\" => \"" . Main::Chars($_POST["Folder"]) . "\",",
-                "\"usedp\" => " . Main::Chars($_POST["UseDP"]) . ",",
-                "\"dpassword\" => \"" . Main::Chars($_POST["DPassword"]) . "\","
-            ],
-            $config);
 
-            fwrite($file, $config);
-            fclose($file);*/
             $_SESSION["data"][2] = true;
             Main::Redirect("./install.php?setup=3");
         } else {
@@ -182,22 +144,6 @@ if (isset($_POST["submit"])) {
                 "username" => Main::Chars($_POST["username"]),
                 "password" => Main::Chars($_POST["password"])
             ];
-            /*$config = file_get_contents(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
-            unlink(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt");
-            $file = fopen(__DIR__ . "/temp_" . $_SESSION["temp"] . ".txt", "w");
-            $config = str_replace([
-                "\"address\" => \"10.10.10.10\",",
-                "\"username\" => \"User\",",
-                "\"password\" => \"example123456\","
-            ], [
-                "\"address\" => \"" . $_POST["address"] . "\",",
-                "\"username\" => \"" . $_POST["username"] . "\",",
-                "\"password\" => \"" . $_POST["password"] . "\","
-            ],
-            $config);
-
-            fwrite($file, $config);
-            fclose($file);*/
             $_SESSION["data"][3] = true;
             Main::Redirect("./install.php?setup=4");
         } else {

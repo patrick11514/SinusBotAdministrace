@@ -1,21 +1,60 @@
 <?php
 
+/**
+ * Main class for sinusbot
+ * 
+ * @author    patrick115 <info@patrick115.eu>
+ * @copyright ©2019
+ * @link      https://patrick115.eu
+ * @link      https://github.com/patrick11514
+ * @version   0.1.0
+ * 
+ */
+
 namespace patrick115\Sinusbot;
 
-use Exception;
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Config;
 
 class Main extends Database
 {
 
+    /**
+     * Current Version
+     * 
+     * @var string
+     */
+    private static $version = "0.1.0";
+
+    /**
+     * Current build
+     * 
+     * @var string
+     */
+    private static $build = "beta";
+
+    /**
+     * SSH connection
+     * 
+     * @var object
+     */
     private static $ssh = NULL;
 
+    /**
+     * On construct connect to database
+     * 
+     */
     public function __construct()
     {
         Database::Connect();
     }
 
+    /**
+     * Safe redirect by header
+     * 
+     * @param string $url Url
+     * 
+     */
     public static function Redirect($url)
     {
         header("location: " . $url);
@@ -23,13 +62,50 @@ class Main extends Database
         exit();
     }
 
+    /**
+     * Validate form inputs from 1st part
+     * 
+     * @param boolean $version Return version or no
+     * @param boolean $build Return build or no
+     * 
+     */
+    public static function getVerBuild($version = true, $build = false)
+    {
+
+        if ($version === true) {
+            $version = " " . self::$version;
+        } else {
+            $version = "";
+        }
+        if ($build === true) {
+            $build = self::$build;
+        } else {
+            $build = "";
+        }
+        return $build . $version;
+    }
+
+    /**
+     * Converts text and html tags to text
+     * 
+     * @param string $text Cenverted text
+     * 
+     */
     public static function Chars($text)
     {
+        if (parent::$connected === true) {
+            $text = parent::removeChars($text);
+        }
+
         $text = htmlspecialchars($text);
         
         return $text;
     }
 
+    /**
+     * Connect to SSH
+     * 
+     */
     private static function SSHConnect()
     {
         if (self::$ssh === NULL){
@@ -49,6 +125,12 @@ class Main extends Database
         return self::$ssh;
     }
 
+    /**
+     * Execute SSH command
+     * 
+     * @param string $command Command to execute
+     * 
+     */
     public static function SSHExecute($command)
     {
         self::SSHConnect();
@@ -58,6 +140,12 @@ class Main extends Database
         ssh2_exec($conn, $command);
     }
 
+    /**
+     * Destroy session
+     * 
+     * @param boolean $delete Delete session?
+     * 
+     */
     public static function sessDestroy($delete = true)
     {
         session_destroy();
@@ -66,15 +154,28 @@ class Main extends Database
         session_regenerate_id($delete);
     }
 
+    /**
+     * Create user
+     * 
+     * @param string $username  Username
+     * @param string $password  Password
+     * @param string $ipaddress IpAddress
+     * @param string $perms     Permissions
+     * 
+     */
     public function createUser($username, $password, $ipaddress, $perms = "default")
     {
         if (Database::select(["username"], "users", "LIMIT 1", "username", $username)->num_rows <= 0) {
-            Database::execute("INSERT INTO `sinusbot_users` (`id`, `username`, `password`, `register_ip`, `last_ip`, `bot_id`) VALUES (NULL, '$username', '$password', '$ipaddress', '$ipaddress', '')");
+            Database::execute("INSERT INTO `sinusbot_users` (`id`, `username`, `password`, `register_ip`, `last_ip`, `bot_id`) VALUES (NULL, '$username', '" . password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)) . "', '$ipaddress', '$ipaddress', '')");
         } else {
             parent::catchError("User {$username} Already Exist", debug_backtrace());
         }
     }
 
+    /**
+     * Get user ip
+     * 
+     */
     public static function getUserIP()
     {
         $ipaddress = '';
@@ -100,10 +201,5 @@ class Main extends Database
     public function Login($username, $password)
     {
 
-    }
-
-    public static function test()
-    {
-        var_dump(debug_backtrace());
     }
 }

@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Main class for sinusbot
+ * 
+ * @author    patrick115 <info@patrick115.eu>
+ * @copyright ©2019
+ * @link      https://patrick115.eu
+ * @link      https://github.com/patrick11514
+ * @version   0.1.0
+ * 
+ */
+
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Error;
@@ -10,12 +21,39 @@ use Exception;
 class Database extends Error
 {
 
+    /**
+     * Connection to database
+     * 
+     * @var object
+     */
     private static $conn = NULL;
 
+    /**
+     * Status of connection
+     * 
+     * @var boolean
+     */
+    public static $connected = NULL;
+
+    /**
+     * Contains last database error
+     * 
+     * @var string
+     */
     public static $error;
 
+    /**
+     * Table prefix
+     * 
+     * @var string
+     */
     private static $table_prefix;
 
+
+    /**
+     * Connect to database
+     * 
+     */
     protected static function Connect()
     {
         if (self::$conn === NULL) {
@@ -37,9 +75,28 @@ class Database extends Error
             }
 
             self::$conn = $conn;
+            self::$connected = true;
         }
     }
 
+    /**
+     * Remove MYSQLInsert characters
+     * 
+     * @param string $string String
+     * 
+     */
+    protected static function removeChars($string)
+    {
+        self::$conn->real_escape_string($string);
+        return $string;
+    }
+
+    /**
+     * Catch error
+     * 
+     * @param string $error Error to convert
+     * 
+     */
     private static function errorConvert($error)
     {
         $uperror = $error . PHP_EOL;
@@ -58,6 +115,13 @@ class Database extends Error
         return $return;
     }
 
+    /**
+     * Select
+     * 
+     * @param string $e Error message
+     * @param object $dump Informations about error
+     * 
+     */
     public static function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
     {
         self::Connect();
