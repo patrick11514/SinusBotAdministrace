@@ -53,7 +53,7 @@ class Config extends Error
     /**
      * Get config value
      * 
-     * @var string $path Get path from config
+     * @param string $path Get path from config
      */
     public static function getConfig($path)
     {

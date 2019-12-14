@@ -1,13 +1,5 @@
 <?php
 
-ini_set('zlib.output_compression', 0);
-ini_set('implicit_flush', 1);
-ob_end_clean();
-set_time_limit(0);
-ob_implicit_flush(1);
-
-session_start();
-
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Install;
@@ -270,7 +262,7 @@ Error::returnError();
         <!-- Footer -->
         <footer id="footer">
             <ul class="copyright">
-                <li>&copy;<?php $release = (int) 2019; if((int) date("Y") > $release){ echo $release . "-" . date("Y");} else {echo date("Y");} ?> <a class="icon brands fa-github"></a><a target="_blank" href="https://github.com/patrick11514">patrick115</a></li>
+                <li>&copy;<?php $release = (int) 2019; if((int) date("Y") > $release){ echo $release . "-" . date("Y");} else {echo date("Y");} ?> <i class="icon brands fa-github"></i><a target="_blank" href="https://github.com/patrick11514">patrick115</a></li>
                 </li>
             </ul>
             <ul class="copyright">
