@@ -16,18 +16,20 @@ namespace patrick115\Sinusbot;
 use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Singleton;
 use mysqli;
 use Exception;
 
 class Database extends Error
 {
+    use Singleton;
 
     /**
      * Connection to database
      * 
      * @var object
      */
-    private static $conn = NULL;
+    private $conn = NULL;
 
     /**
      * Status of connection
@@ -41,42 +43,50 @@ class Database extends Error
      * 
      * @var string
      */
-    public static $error;
+    public $error;
 
     /**
      * Table prefix
      * 
      * @var string
      */
-    private static $table_prefix;
+    protected $table_prefix;
 
+    private $config;
+
+    private function __construct()
+    {
+        $this->config = Config::init();
+        $this->Connect();
+    }
 
     /**
      * Connect to database
      * 
      */
-    protected static function Connect()
+    protected function Connect()
     {
-        if (self::$conn === NULL) {
+        if ($this->conn === NULL) {
 
-            self::$table_prefix = Config::getConfig("Database/prefix");
+            $this->table_prefix = $this->config->getConfig("Database/prefix");
 
             $conn = new mysqli(
-                Config::getConfig("Database/address")
+                $this->config->getConfig("Database/address")
                  . ":" . 
-                Config::getConfig("Database/port"), 
-                Config::getConfig("Database/username"), 
-                Config::getConfig("Database/password"), 
-                Config::getConfig("Database/database")
+                $this->config->getConfig("Database/port"), 
+                $this->config->getConfig("Database/username"), 
+                $this->config->getConfig("Database/password"), 
+                $this->config->getConfig("Database/database")
             );
             $conn->set_charset("utf8mb4");
 
             if (isset($conn->connect_error)) {
-                parent::catchError(self::errorConvert($conn->connect_error), debug_backtrace());
+                $this->catchError($this->errorConvert($conn->connect_error), debug_backtrace());
             }
 
-            self::$conn = $conn;
+            $this->conn = $conn;
             self::$connected = true;
+            return $conn;
         }
     }
 
@@ -88,9 +98,11 @@ class Database extends Error
      */
     protected static function removeChars($string)
     {
-        self::$conn->real_escape_string($string);
+        (new self)->conn->real_escape_string($string);
         return $string;
     }
+
+    
 
     /**
      * Catch error
@@ -126,14 +138,12 @@ class Database extends Error
      * @param string $needle
      * 
      */
-    public static function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
+    public function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
     {
-        self::Connect();
-
-        $table = self::convertTableName($table);
+        $table = $this->convertTableName($table);
 
         if (empty($params) || empty($table)) {
-            parent::catchError("Empty parameter(s).", debug_backtrace());
+            $this->catchError("Empty parameter(s).", debug_backtrace());
         }
         $list = "";
         for ($i=0; $i < count($params) - 1; $i++) { 
@@ -146,10 +156,10 @@ class Database extends Error
             $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle' $options"; 
         }
         try {
-            $return = self::$conn->query($command);
+            $return = $this->conn->query($command);
         } catch (Exception $e) {
             $error = $e->getMessage();
-            parent::catchError($error, debug_backtrace());
+            $this->catchError($error, debug_backtrace());
         }
         return $return;
     }
@@ -161,14 +171,13 @@ class Database extends Error
      * @param boolean $return return result
      * 
      */
-    public static function execute($sql, $return = false)
+    public function execute($sql, $return = false)
     {
-        self::Connect();
-        $return = self::$conn->query(Main::Chars($sql));
-        if (!empty(self::$conn->error)) {
-            parent::catchError(self::$conn->error, debug_backtrace());
+        $return = $this->conn->query(Main::Chars($sql));
+        if (!empty($this->conn->error)) {
+            $this->catchError($this->conn->error, debug_backtrace());
         }
-        if ($return === true) {
+        if (!empty($return)) {
             return $return;
         }
     }
@@ -183,19 +192,19 @@ class Database extends Error
      * @param string $database Database
      * 
      */
-    public static function checkConnection($address, $port, $username, $password, $database)
+    public function checkConnection($address, $port, $username, $password, $database)
     {
 
         $conn = new mysqli($address . ":" . $port, $username, $password);
         $conn->query("USE {$database};");
         if (!empty($conn->error)) {
             echo $conn->error;
-            self::$error = self::errorConvert($conn->error);
+            $this->error = $this->errorConvert($conn->error);
             return false;
         }
         $conn->set_charset("utf8mb4");
         if (isset($conn->connect_error)) {
-            self::$error = self::errorConvert($conn->connect_error);
+            $this->error = $this->errorConvert($conn->connect_error);
             return false;
         }
         return true;
@@ -207,12 +216,18 @@ class Database extends Error
      * @param string $table Table
      * 
      */
-    public static function convertTableName($table)
+    public function convertTableName($table)
     {
-        if (strpos($table, Config::getConfig("Database/prefix")) === false) {
-            return Config::getConfig("Database/prefix") . $table;
+        if (strpos($table, $this->config->getConfig("Database/prefix")) === false) {
+            return $this->config->getConfig("Database/prefix") . $table;
         } else {
-            parent::catchError("Converted table, contains table prefix.", debug_backtrace());
+            $this->catchError("Converted table, contains table prefix.", debug_backtrace());
         }
     }
+
+    protected function num_rows($rv)
+    {
+        return $rv->num_rows;
+    }
 }
+

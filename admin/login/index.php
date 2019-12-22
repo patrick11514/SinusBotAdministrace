@@ -1,11 +1,22 @@
 <?php
-
-use patrick115\Sinusbot\Error;
+use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Session;
 
 include __DIR__ . "/../../src/Class.php";
 
+Session::sessionStart();
 
-Error::returnError();
+if (Session::get("logged")) {
+    Main::Redirect("../");
+}
+
+$login = new Main();
+
+if (!empty($_POST) && $_POST["submit"]) {
+    $error = $login->Login($_POST["username"], $_POST["password"]);
+}
+
+$errors->returnError();
 
 ?>
 
@@ -40,6 +51,19 @@ Error::returnError();
                 <h3 style="color:red"><?=$error;?></h3>
                 <?php endif;?>
             </header>
+            <form action="" method="post">
+                <div class="fields">
+                    <div class="field">
+                        <input type="text" name="username" id="" required>
+                    </div>
+                    <div class="field">
+                        <input type="password" name="password" id="" required>
+                    </div>
+                </div>
+                <ul class="actions special">
+                    <li><input type="submit" name="submit" value="Login" id="" required></li>
+                </ul>
+            </form>
         </section>
 
         <!-- Footer -->

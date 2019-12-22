@@ -14,16 +14,19 @@
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Error;
+use patrick115\Sinusbot\Singleton;
 
 class Config extends Error
 {
+
+    use Singleton;
 
     /**
      * Config values
      * 
      * @var array
      */
-    private static $config = NULL;
+    private $mem_config = NULL;
 
     /**
      * Config directory
@@ -36,18 +39,22 @@ class Config extends Error
      * Prevence to construct this function
      * 
      */
-    private function __construct() {}
-
-    private static function loadConfig()
-    {
-        if (self::$config === NULL) {
-        	if (!file_exists(__DIR__ . "/config/config.php")) {
-                parent::catchError("Config file not found.", debug_backtrace());
-        	}
+    private function __construct() {
+        if (!file_exists(__DIR__ . "/config/config.php")) {
+            $this->catchError("Config file not found.", debug_backtrace());
+        } else {
             include self::$configDir;
-            self::$config = $config;
+            $this->mem_config = $config;
+            return $config;
         }
-        return self::$config;
+    }
+
+    public static function existConfig()
+    {
+        if (file_exists(self::$configDir)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -55,9 +62,9 @@ class Config extends Error
      * 
      * @param string $path Get path from config
      */
-    public static function getConfig($path)
+    public function getConfig($path)
     {
-        $config = self::loadConfig();
+        $config = $this->mem_config;
 
         $part = explode("/", $path);
 
@@ -67,7 +74,7 @@ class Config extends Error
 
         for ($i=0; $i < count($part); $i++) { 
             if (empty($config[$part[$i]])) {
-                parent::catchError("Can't find {$path} in config!", debug_backtrace());
+                $this->catchError("Can't find {$path} in config!", debug_backtrace());
             }
             $config = $config[$part[$i]];
         }

@@ -21,14 +21,16 @@ class Error
      * 
      * @var array
      */
-    private static $catcherror = NULL;
+    private $catcherror = NULL;
 
     /**
      * Contains error time
      * 
      * @var array
      */
-    private static $catchtime = NULL;
+    private $catchtime = NULL;
+
+    private $comm_error;
 
     /**
      * Catch error
@@ -43,25 +45,35 @@ class Error
         $class = $dump[0]["class"];
         $function = $dump[0]["function"];
         $line = $dump[0]["line"];
-        self::$catcherror[] = "<b>{$file}({$line}):</b> <i>{$class}::{$function}:</i> " . $e;
-        self::$catchtime[] = date("H:i:s");
+        $this->catcherror[] = "<b>{$file}({$line}):</b> <i>{$class}::{$function}:</i> " . $e;
+        $this->catchtime[] = date("H:i:s");
     }
 
     /**
      * Return all errors
      * 
      */
-    public static function returnError()
+    public function returnError()
     {
-        if(self::$catcherror !== NULL) {
+        if($this->catcherror !== NULL) {
             $return = "<pre>";
-            $return .= "<b>Errors (" . count(self::$catcherror) . "):</b>" . PHP_EOL;
-            foreach (self::$catcherror as $id => $error) {
-                $return .= "[" . self::$catchtime[$id] . "] " . $error . PHP_EOL;
+            $return .= "<b>Errors (" . count($this->catcherror) . "):</b>" . PHP_EOL;
+            foreach ($this->catcherror as $id => $error) {
+                $return .= "[" . $this->catchtime[$id] . "] " . $error . PHP_EOL;
             }
             $return .= "</pre>";
             echo $return;
             die();
         }
+    }
+
+    protected function putError($e)
+    {
+        $this->comm_error = $e;
+    }
+
+    protected function getError()
+    {
+        return $this->comm_error;
     }
 }

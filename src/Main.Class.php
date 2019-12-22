@@ -39,6 +39,8 @@ class Main extends Database
      * @var object
      */
     private static $ssh = NULL;
+    
+    private $config;
 
     /**
      * On construct connect to database
@@ -46,7 +48,8 @@ class Main extends Database
      */
     public function __construct()
     {
-        Database::Connect();
+        $this->database = Database::init();
+        $this->config = Config::init();
     }
 
     /**
@@ -86,35 +89,18 @@ class Main extends Database
     }
 
     /**
-     * Converts text and html tags to text
-     * 
-     * @param string $text Cenverted text
-     * 
-     */
-    public static function Chars($text)
-    {
-        if (parent::$connected === true) {
-            $text = parent::removeChars($text);
-        }
-
-        $text = htmlspecialchars($text);
-        
-        return $text;
-    }
-
-    /**
      * Connect to SSH
      * 
      */
-    private static function SSHConnect()
+    private function SSHConnect()
     {
         if (self::$ssh === NULL){
             self::$ssh = "-";
-            if (empty(Config::getConfig("SSH/address")) || Config::getConfig("SSH/address") === "") {
-                parent::catchError("Connection failded to " . Config::getConfig("SSH/address"), debug_backtrace());
+            if (empty($this->config->getConfig("SSH/address")) || $this->config->getConfig("SSH/address") === "") {
+                parent::catchError("Connection failded to " . $this->config->getConfig("SSH/address"), debug_backtrace());
             } else {
-                $connection = ssh2_connect(Config::getConfig("SSH/address"), 22);
-                if (!ssh2_auth_password($connection, Config::getConfig("SSH/username"), Config::getConfig("SSH/password"))) {
+                $connection = ssh2_connect($this->config->getConfig("SSH/address"), 22);
+                if (!ssh2_auth_password($connection, $this->config->getConfig("SSH/username"), $this->config->getConfig("SSH/password"))) {
                     parent::catchError("Login credentials is invalid", debug_backtrace());
                 } else {
                     self::$ssh = $connection;
@@ -131,13 +117,30 @@ class Main extends Database
      * @param string $command Command to execute
      * 
      */
-    public static function SSHExecute($command)
+    public function SSHExecute($command)
     {
-        self::SSHConnect();
+        $this->SSHConnect();
 
         $conn = self::$ssh;
 
         ssh2_exec($conn, $command);
+    }
+
+    /**
+     * Converts text and html tags to text
+     * 
+     * @param string $text Cenverted text
+     * 
+     */
+    public static function Chars($text)
+    {
+        if (parent::$connected === true) {
+            $text = parent::removeChars($text);
+        }
+
+        $text = htmlspecialchars($text);
+        
+        return $text;
     }
 
     /**
@@ -165,10 +168,10 @@ class Main extends Database
      */
     public function createUser($username, $password, $ipaddress, $perms = "default")
     {
-        if (Database::select(["username"], "users", "LIMIT 1", "username", $username)->num_rows <= 0) {
-            Database::execute("INSERT INTO `sinusbot_users` (`id`, `username`, `password`, `register_ip`, `last_ip`, `bot_id`) VALUES (NULL, '$username', '" . password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)) . "', '$ipaddress', '$ipaddress', '')");
+        if (Database::init()->select(["username"], "users", "LIMIT 1", "username", $username)->num_rows <= 0) {
+            Database::init()->execute("INSERT INTO `" . $this->table_prefix . "users` (`id`, `username`, `password`, `register_ip`, `last_ip`, `bot_id`) VALUES (NULL, '$username', '" . password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)) . "', '$ipaddress', '$ipaddress', '')");
         } else {
-            parent::catchError("User {$username} Already Exist", debug_backtrace());
+            $this->catchError("User {$username} Already Exist", debug_backtrace());
         }
     }
 
@@ -198,8 +201,27 @@ class Main extends Database
         return $ipaddress;
     }
 
+    public function validateCredentials($username, $password)
+    {
+        $return = $this->database->execute("SELECT `password` FROM `" . $this->database->convertTableName("users") . "` WHERE `username` = '$username'");
+        if (!empty($this->database->num_rows($return)) && $this->database->num_rows($return) > 0) {
+            if (password_verify($password, $return->fetch_object()->password)) {
+
+            } else {
+                $this->putError("Username not found");
+            }
+        } else {
+            $this->putError("Username not found");
+        }
+        
+    }
+
     public function Login($username, $password)
     {
-
+        $username = self::Chars($username);
+        $password = self::Chars($password);
+        if (!$this->validateCredentials($username, $password)) {
+            return $this->getError();
+        }
     }
 }

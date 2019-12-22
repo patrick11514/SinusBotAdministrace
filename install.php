@@ -4,10 +4,15 @@ use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Install;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Session;
+
+$installer = true;
 
 include __DIR__ . "/src/Class.php";
 
 include __DIR__ . "/src/installer/installs.php";
+
+Session::sessionStart();
 
 if (file_exists(__DIR__ . "/src/installer/install.lock")) {
     Main::Redirect("./index.php");
@@ -212,16 +217,14 @@ if (isset($_POST["submit"])) {
     
 }
 
-
-ob_flush();
-flush();
 if ($part == "6") {
+    flush();
     echo "<pre id=\"install\">Status:<br><div id=\"log\"></div></pre><script src=\"https://code.jquery.com/jquery-3.4.1.min.js\" integrity=\"sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=\" crossorigin=\"anonymous\"></script>";
     Install::Install_bot(__DIR__);
 }
 
 
-Error::returnError();
+$errors->returnError();
 
 ?>
 

@@ -16,7 +16,6 @@ namespace patrick115\Sinusbot;
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
-use patrick115\Sinusbot\Sinusbot;
 use ZipArchive;
 
 class Install extends Database
@@ -176,6 +175,16 @@ class Install extends Database
             unlink(__DIR__ . "/../sinusbot_latest.zip");
         }
 
+        $init = Database::init();
+
+        $main = new Main();
+
+        echo "<script>$(\"#log\").text(\"Prepairing...\");</script>";
+        flush();
+
+        sleep(2);
+
+
         //-----------------------------
 
         echo "<script>$(\"#log\").text(\"Prepairing SQL..\");</script>";
@@ -185,15 +194,13 @@ class Install extends Database
                         "<%DATABASE%>",
                         "<%PREFIX%>",
                     ], [
-                        Config::getConfig("Database/database"),
-                        Config::getConfig("Database/prefix"),
+                        Config::init()->getConfig("Database/database"),
+                        Config::init()->getConfig("Database/prefix"),
                     ],
         				$content
         		    );
 
-        $sql = explode("\n", $content);
-
-        unset($sql[(count($sql) - 1)]);
+        $sql = explode(";", $content);
 
         //-------------------------
 
@@ -201,8 +208,9 @@ class Install extends Database
         foreach ($sql as $command){
             $i++;
             echo "<script>$(\"#log\").text(\"Executing SQL commands ({$i})\");</script>";
-    
-        	Database::execute($command);
+            if (!empty($command)) {
+                $init->execute($command);
+            }
         }
 
         //-------------------------
@@ -242,7 +250,7 @@ class Install extends Database
         echo "<script>$(\"#log\").text(\"Prepairing SSH commands..\");</script>";
         
 
-        $sdir = Config::getConfig("Bot/folder");
+        $sdir = Config::init()->getConfig("Bot/folder");
 
         $exec[] = "id -u sinusbot &>/dev/null || useradd --disable-login sinusbot";
         $exec[] = "mkdir -p {$sdir}";
@@ -263,7 +271,7 @@ class Install extends Database
             $i++;
             echo "<script>$(\"#log\").text(\"Executing SSH commands ({$i})\");</script>";
 
-            Main::SSHExecute($command);
+            $main->SSHExecute($command);
         }
 
         //------------------------
@@ -271,7 +279,7 @@ class Install extends Database
         echo "<script>$(\"#log\").text(\"Creating new user..\");</script>";
         
 
-        Main::createUser($_SESSION["data"]["user"]["username"], $_SESSION["data"]["user"]["password"], Main::getUserIP());
+        $main->createUser($_SESSION["data"]["user"]["username"], $_SESSION["data"]["user"]["password"], Main::getUserIP());
 
         //-----------------------------
 
