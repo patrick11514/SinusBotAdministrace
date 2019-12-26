@@ -54,9 +54,12 @@ class Database extends Error
 
     private $config;
 
+    private $errors;
+
     private function __construct()
     {
         $this->config = Config::init();
+        $this->errors = Error::init();
         $this->Connect();
     }
 
@@ -81,7 +84,7 @@ class Database extends Error
             $conn->set_charset("utf8mb4");
 
             if (isset($conn->connect_error)) {
-                $this->catchError($this->errorConvert($conn->connect_error), debug_backtrace());
+                $this->errors->catchError($this->errorConvert($conn->connect_error), debug_backtrace());
             }
 
             $this->conn = $conn;
@@ -98,7 +101,7 @@ class Database extends Error
      */
     protected static function removeChars($string)
     {
-        (new self)->conn->real_escape_string($string);
+        self::init()->conn->real_escape_string($string);
         return $string;
     }
 
@@ -110,7 +113,7 @@ class Database extends Error
      * @param string $error Error to convert
      * 
      */
-    private static function errorConvert($error)
+    private function errorConvert($error)
     {
         $uperror = $error . PHP_EOL;
         $error = strtolower($error);
@@ -143,7 +146,7 @@ class Database extends Error
         $table = $this->convertTableName($table);
 
         if (empty($params) || empty($table)) {
-            $this->catchError("Empty parameter(s).", debug_backtrace());
+            $this->errors->catchError("Empty parameter(s).", debug_backtrace());
         }
         $list = "";
         for ($i=0; $i < count($params) - 1; $i++) { 
@@ -159,7 +162,7 @@ class Database extends Error
             $return = $this->conn->query($command);
         } catch (Exception $e) {
             $error = $e->getMessage();
-            $this->catchError($error, debug_backtrace());
+            $this->errors->catchError($error, debug_backtrace());
         }
         return $return;
     }
@@ -175,11 +178,105 @@ class Database extends Error
     {
         $return = $this->conn->query(Main::Chars($sql));
         if (!empty($this->conn->error)) {
-            $this->catchError($this->conn->error, debug_backtrace());
+            $this->errors->catchError($this->conn->error, debug_backtrace());
         }
+
         if (!empty($return)) {
             return $return;
         }
+    }
+
+    public function insert($table, $values, $params)
+    {
+        if (!is_array($values)) {
+            $this->errors->catchError("Values must be array", debug_backtrace());
+            return;
+        }
+
+        if (!is_array($params)) {
+            $this->errors->catchError("Params must be array", debug_backtrace());
+            return;
+        }
+
+        if (count($values) !== count($params)) {
+            $this->errors->catchError("Values and params don't have same count", debug_backtrace());
+            return;
+        }
+
+        $table = $this->convertTableName($table);
+        $vals = "";
+        for ($i = 0; $i < (count($values) - 1 ); $i++) {
+            $vals .= "`" . Main::Chars($values[$i]) . "`, ";
+        }
+        $vals .= "`{$values[(count($values) - 1)]}`";
+
+        $pars = "";
+        for ($i = 0; $i < (count($params) - 1 ); $i++) {
+            $pars .= "'" . Main::Chars($params[$i]) . "', ";
+        }
+        $pars .= "'" . $params[(count($params) - 1)] . "'";
+
+        $command = "INSERT INTO $table ($vals) VALUES ($pars);";
+        $this->execute($command, false);
+    }
+
+    public function update($table, $haystack, $needle, $names, $vals)
+    {
+        if (!is_array($names)) {
+            $this->errors->catchError("Names must be array", debug_backtrace());
+            return;
+        }
+
+        if (!is_array($vals)) {
+            $this->errors->catchError("Values must be array", debug_backtrace());
+            return;
+        }
+
+        if (count($names) !== count($vals)) {
+            $this->errors->catchError("Names and Values don't have same count", debug_backtrace());
+            return;
+        }
+        if (is_array($haystack)) {
+            if (!is_array($needle)) {
+                $this->errors->catchError("If haystack is array, needle must be too", debug_backtrace());
+                return;
+            }
+        }
+        if (is_array($needle)) {
+            if (!is_array($haystack)) {
+                $this->errors->catchError("If needle is array, haystack must be too", debug_backtrace());
+                return;
+            }
+        }
+        if (count($haystack) !== count($needle)) {
+            $this->errors->catchError("Haystack and needle must have same count", debug_backtrace());
+            return;
+        }
+
+        $table = $this->convertTableName($table);
+
+        $sets = "";
+
+        for ($i = 0; $i < (count($names) - 1); $i++) {
+            $sets .= "`{$names[$i]}` = '{$vals[$i]}', ";
+        }
+        $sets .= "`{$names[(count($names) - 1)]}` = '{$vals[(count($vals) - 1)]}'";
+        
+        if (is_array($haystack)) {
+            $where = "";
+            for ($i = 0; $i < (count($haystack) - 1); $i++) {
+                $where .= "`{$haystack[$i]}` = '{$needle[$i]}' AND ";
+            }
+            $where .= "`{$haystack[(count($haystack) - 1)]}` = '{$needle[(count($needle) - 1)]}'";
+        } else {
+            $where = "`$haystack` = '$needle'";
+        }
+
+
+        $command = "UPDATE `$table` SET $sets WHERE $where";
+
+        $this->execute($command, false);
+
     }
 
     /**
@@ -195,7 +292,11 @@ class Database extends Error
     public function checkConnection($address, $port, $username, $password, $database)
     {
 
-        $conn = new mysqli($address . ":" . $port, $username, $password);
+        $conn = @new mysqli($address . ":" . $port, $username, $password);
+        if (isset($conn->connect_error)) {
+            $this->error = $this->errorConvert($conn->connect_error);
+            return false;
+        }
         $conn->query("USE {$database};");
         if (!empty($conn->error)) {
             echo $conn->error;
@@ -203,10 +304,7 @@ class Database extends Error
             return false;
         }
         $conn->set_charset("utf8mb4");
-        if (isset($conn->connect_error)) {
-            $this->error = $this->errorConvert($conn->connect_error);
-            return false;
-        }
+        
         return true;
     }
 
@@ -221,7 +319,7 @@ class Database extends Error
         if (strpos($table, $this->config->getConfig("Database/prefix")) === false) {
             return $this->config->getConfig("Database/prefix") . $table;
         } else {
-            $this->catchError("Converted table, contains table prefix.", debug_backtrace());
+            $this->errors->catchError("Converted table, contains table prefix.", debug_backtrace());
         }
     }
 

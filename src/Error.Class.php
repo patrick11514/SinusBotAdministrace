@@ -13,8 +13,12 @@
 
 namespace patrick115\Sinusbot;
 
+use patrick115\Sinusbot\Singleton;
+
 class Error
 {
+
+    use Singleton;
 
     /**
      * Contains all errors
@@ -31,6 +35,10 @@ class Error
     private $catchtime = NULL;
 
     private $comm_error;
+
+    private function __construct() {
+
+    }
 
     /**
      * Catch error

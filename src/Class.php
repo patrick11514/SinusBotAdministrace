@@ -27,6 +27,7 @@ spl_autoload_register(function($class) {
     include_once $path;
 });
 
+session_start();
 
 $config = Config::init();
 
@@ -42,4 +43,4 @@ if (Config::existConfig()) {
     }
 }
 
-$errors = new Error();
+$errors = Error::init();

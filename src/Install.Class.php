@@ -171,6 +171,10 @@ class Install extends Database
     public static function Install_bot($dir)
     {
 
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+
         if (file_exists(__DIR__ . "/../sinusbot_latest.zip")) {
             unlink(__DIR__ . "/../sinusbot_latest.zip");
         }
@@ -285,7 +289,6 @@ class Install extends Database
 
         echo "<script>$(\"#log\").text(\"Cleaning temp files...\");</script>";
         
-        
         foreach (glob(__DIR__ . "/../temp_*.txt") as $file) {
             unlink($file);
         }
@@ -297,6 +300,5 @@ class Install extends Database
         fclose($file);
 
         echo "<script>$(\"#log\").text(\"Done\");</script>";
-        
     }
 }

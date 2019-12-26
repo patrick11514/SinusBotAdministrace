@@ -73,7 +73,7 @@ if ($check === false) {
 if (isset($_POST["submit"])) {
     if ($part == 1) {
         if (Install::validate_1($_POST)) {
-            if (Database::checkConnection(
+            if (Database::init()->checkConnection(
                 Main::Chars($_POST["address"]),
                 Main::Chars($_POST["port"]),
                 Main::Chars($_POST["username"]),
@@ -113,24 +113,27 @@ if (isset($_POST["submit"])) {
                     $error = "Database contains some tables, please remove them.";
                 }   
             } else {
-                $error = Database::$error;
+                $error = Database::init()->error;
             }
         } else {
             $error = Install::$lasterror;
         }
     } else if ($part == 2) {
         if (Install::validate_2($_POST)) {
+            if (file_exists(Main::Chars($_POST["Folder"])) && (count(scandir(Main::Chars($_POST["Folder"])))) > 2) {
+                $error = "Folder {$_POST["Folder"]} is not empty!";
+            } else {
 
+                $_SESSION["data"]["bot"] = [
+                    "d_port" => Main::Chars($_POST["D_Port"]),
+                    "folder" => Main::Chars($_POST["Folder"]),
+                    "usedp" => Main::Chars($_POST["UseDP"]),
+                    "dpassword" => Main::Chars($_POST["DPassword"])
+                ];
 
-            $_SESSION["data"]["bot"] = [
-                "d_port" => Main::Chars($_POST["D_Port"]),
-                "folder" => Main::Chars($_POST["Folder"]),
-                "usedp" => Main::Chars($_POST["UseDP"]),
-                "dpassword" => Main::Chars($_POST["DPassword"])
-            ];
-
-            $_SESSION["data"][2] = true;
-            Main::Redirect("./install.php?setup=3");
+                $_SESSION["data"][2] = true;
+                Main::Redirect("./install.php?setup=3");    
+            }
         } else {
             $error = Install::$lasterror;
         }

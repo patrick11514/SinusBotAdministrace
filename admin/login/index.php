@@ -4,8 +4,6 @@ use patrick115\Sinusbot\Session;
 
 include __DIR__ . "/../../src/Class.php";
 
-Session::sessionStart();
-
 if (Session::get("logged")) {
     Main::Redirect("../");
 }
@@ -29,7 +27,7 @@ $errors->returnError();
 <html>
 
 <head>
-    <title>Install | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <title>Login | <?= $_SERVER['SERVER_NAME'] ?></title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <link rel="stylesheet" href="assets/css/main.css" />

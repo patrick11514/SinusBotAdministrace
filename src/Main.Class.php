@@ -169,7 +169,8 @@ class Main extends Database
     public function createUser($username, $password, $ipaddress, $perms = "default")
     {
         if (Database::init()->select(["username"], "users", "LIMIT 1", "username", $username)->num_rows <= 0) {
-            Database::init()->execute("INSERT INTO `" . $this->table_prefix . "users` (`id`, `username`, `password`, `register_ip`, `last_ip`, `bot_id`) VALUES (NULL, '$username', '" . password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)) . "', '$ipaddress', '$ipaddress', '')");
+            Database::init()->insert("users", ["id", "username", "password", "register_ip", "last_ip", "bot_id"], ["", "test123", "test123", "10.10.10.10", "10.10.10.10", ""]);
+            Database::init()->insert("users", ["id", "username", "password", "register_ip", "last_ip", "bot_id"], ["", $username, password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)), $ipaddress, $ipaddress, ""]);
         } else {
             $this->catchError("User {$username} Already Exist", debug_backtrace());
         }
@@ -203,15 +204,25 @@ class Main extends Database
 
     public function validateCredentials($username, $password)
     {
-        $return = $this->database->execute("SELECT `password` FROM `" . $this->database->convertTableName("users") . "` WHERE `username` = '$username'");
+        $return = $this->database->execute("SELECT `password`, `last_ip` FROM `" . $this->database->convertTableName("users") . "` WHERE `username` = '$username'", true);
+        $obj = $return->fetch_object();
+    
         if (!empty($this->database->num_rows($return)) && $this->database->num_rows($return) > 0) {
-            if (password_verify($password, $return->fetch_object()->password)) {
-
+            if (password_verify($password, $obj->password)) {
+                if ($obj->last_ip == $this->getUserIP()) {
+                    return true;
+                } else {
+                    $this->database->update("users", "username", $username, ["last_ip"], [$this->getUserIP()]);
+                    ## Email Notify
+                    return true;
+                }
             } else {
-                $this->putError("Username not found");
+                $this->putError("Password doesn't match");
+                return false;
             }
         } else {
             $this->putError("Username not found");
+            return false;
         }
         
     }
@@ -223,5 +234,7 @@ class Main extends Database
         if (!$this->validateCredentials($username, $password)) {
             return $this->getError();
         }
+        Session::put(["logged", "username"], [true, $username]);
+        $this->Redirect("../");
     }
 }

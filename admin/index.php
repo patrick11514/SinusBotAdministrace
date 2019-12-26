@@ -1,16 +1,15 @@
 <?php
 
-use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
 
 include "../src/Class.php";
 
-if (Session::sessionStatus() === false) {
+if (!Session::get("logged")) {
 	Main::Redirect("./login");
 }
 
-Error::returnError();
+$errors->returnError();
 
 ?>
 
