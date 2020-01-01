@@ -3,8 +3,9 @@
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Error;
-
-define("MainDir", __DIR__ . "/..");
+if (empty(@constant('MainDir'))){
+    define("MainDir", __DIR__ . "/..");
+}
 
 ini_set('zlib.output_compression',0);
 ini_set('implicit_flush',1);
@@ -17,6 +18,8 @@ ob_end_clean();
 header('Content-Encoding: none');
 header("Cache-Control: no-cache, must-revalidate");
 header('X-Accel-Buffering: no');
+
+ob_start();
 
 spl_autoload_register(function($class) {
     $first = __DIR__ . '/';
@@ -33,6 +36,7 @@ $config = Config::init();
 
 if (empty($installer) && !file_exists(MainDir . "/src/installer/install.lock")) {
     include(MainDir . "/src/installer/empty.php");
+    exit;
 }
 
 if (Config::existConfig()) {

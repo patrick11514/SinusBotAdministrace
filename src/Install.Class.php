@@ -300,5 +300,45 @@ class Install extends Database
         fclose($file);
 
         echo "<script>$(\"#log\").text(\"Done\");</script>";
+
+        Session::destroy();
+    }
+
+    public function run_reinstall()
+    {
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+
+        $init = Database::init();
+
+        $main = new Main();
+
+        $config = Config::init();
+
+        echo "<script>$(\"#install_log\").text(\"Prepairing...\");</script>";
+        flush();
+
+        sleep(2);
+
+        $tables = [
+            "bots",
+            "settings",
+            "users"
+        ];
+        echo "<script>$(\"#install_log\").text(\"Deleting tables...\");</script>";
+        foreach ($tables as $table) {
+            $init->execute("DROP TABLE IF EXISTS `" . $init->convertTableName($table) . "`");
+        }
+        echo "<script>$(\"#install_log\").text(\"Deleting sinusbot folder\");</script>";
+        $main->SSHExecute("sudo -u sinusbot rm -rf " . $config->getConfig("Bot/folder"));
+        echo "<script>$(\"#install_log\").text(\"Deleting lock file...\");</script>";
+        unlink(MainDir . "/src/installer/install.lock");
+        echo "<script>$(\"#install_log\").text(\"Deleting config file...\");</script>";
+        unlink(MainDir . "/src/config/config.php");    
+        echo "<script>$(\"#install_log\").text(\"Redirecting...\");</script>";
+
+        Session::destroy();
+
     }
 }

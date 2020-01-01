@@ -134,10 +134,10 @@ class Database extends Error
     /**
      * Select rows from table
      * 
-     * @param array $param Selected rows
+     * @param array  $param Selected rows
      * @param string $table Table
      * @param string $option Option like LIMIT 1..
-     * @param string $haystack 
+     * @param string $haystack
      * @param string $needle
      * 
      */
@@ -153,6 +153,9 @@ class Database extends Error
             $list .= "`" . $params[$i] . "`, ";
         }
         $list .= "`" . $params[count($params) - 1] . "`";
+        if ($list === "`*`") {
+            $list = "*";
+        }
         if ($haystack === NULL && $needle === NULL) {
             $command = "SELECT $list FROM `$table` $options";
         } else {
@@ -323,9 +326,17 @@ class Database extends Error
         }
     }
 
-    protected function num_rows($rv)
+    public function num_rows($rv)
     {
         return $rv->num_rows;
+    }
+
+    public function getCountRows($table)
+    {
+        $table = $this->convertTableName($table);
+        $rv = $this->execute("SELECT COUNT(*) FROM `$table`;", true);
+        while ($row = $rv->fetch_assoc()) $count = $row["COUNT(*)"];
+        return $count;
     }
 }
 

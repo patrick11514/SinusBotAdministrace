@@ -15,6 +15,7 @@ namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Config;
+use patrick115\Sinusbot\Error;
 
 class Main extends Database
 {
@@ -42,14 +43,19 @@ class Main extends Database
     
     private $config;
 
+    private $error_c;
+
+    private $database_c;
+
     /**
      * On construct connect to database
      * 
      */
     public function __construct()
     {
-        $this->database = Database::init();
+        $this->database_c = Database::init();
         $this->config = Config::init();
+        $this->error_c = Error::init();
     }
 
     /**
@@ -96,11 +102,11 @@ class Main extends Database
     {
         if (self::$ssh === NULL){
             self::$ssh = "-";
-            if (empty($this->config->getConfig("SSH/address")) || $this->config->getConfig("SSH/address") === "") {
-                parent::catchError("Connection failded to " . $this->config->getConfig("SSH/address"), debug_backtrace());
+            if (empty($this->config->getConfig("SSH/sshaddress")) || $this->config->getConfig("SSH/sshaddress") === "") {
+                parent::catchError("Connection failded to " . $this->config->getConfig("SSH/shhaddress"), debug_backtrace());
             } else {
-                $connection = ssh2_connect($this->config->getConfig("SSH/address"), 22);
-                if (!ssh2_auth_password($connection, $this->config->getConfig("SSH/username"), $this->config->getConfig("SSH/password"))) {
+                $connection = ssh2_connect($this->config->getConfig("SSH/sshaddress"), 22);
+                if (!ssh2_auth_password($connection, $this->config->getConfig("SSH/sshusername"), $this->config->getConfig("SSH/sshpassword"))) {
                     parent::catchError("Login credentials is invalid", debug_backtrace());
                 } else {
                     self::$ssh = $connection;
@@ -169,7 +175,6 @@ class Main extends Database
     public function createUser($username, $password, $ipaddress, $perms = "default")
     {
         if (Database::init()->select(["username"], "users", "LIMIT 1", "username", $username)->num_rows <= 0) {
-            Database::init()->insert("users", ["id", "username", "password", "register_ip", "last_ip", "bot_id"], ["", "test123", "test123", "10.10.10.10", "10.10.10.10", ""]);
             Database::init()->insert("users", ["id", "username", "password", "register_ip", "last_ip", "bot_id"], ["", $username, password_hash($password, PASSWORD_BCRYPT, array("cost" => 10)), $ipaddress, $ipaddress, ""]);
         } else {
             $this->catchError("User {$username} Already Exist", debug_backtrace());
@@ -217,11 +222,11 @@ class Main extends Database
                     return true;
                 }
             } else {
-                $this->putError("Password doesn't match");
+                $this->error_c->putError("Password doesn't match");
                 return false;
             }
         } else {
-            $this->putError("Username not found");
+            $this->error_c->putError("Username not found");
             return false;
         }
         
@@ -234,7 +239,43 @@ class Main extends Database
         if (!$this->validateCredentials($username, $password)) {
             return $this->getError();
         }
+        session_regenerate_id(true);
         Session::put(["logged", "username"], [true, $username]);
-        $this->Redirect("../");
+        if (isset($_GET["back"])) {
+            $url = "../" . $this->Chars($_GET["back"]);
+        } else {
+            $url = "../";
+        }
+        $this->Redirect($url);
+    }
+
+    public static function hide($string)
+    {
+        $count = strlen($string);
+        $return = "";
+        for ($i = 0; $i < $count; $i++)
+        {
+            $return .= "*";
+        }
+        return $return;
+    }
+
+    public static function booltostring($bool)
+    {
+        if ($bool === true) {
+            return "true";
+        }
+        return "false";
+    }
+
+    public function getUserByID($id)
+    {
+        $username = Database::init()->select(["username"], "users", "LIMIT 1", "id", $id);
+        if (Database::init()->num_rows($username) > 0) {
+            return $username->fetch_object()->username;
+        } else {
+            Error::init()->catchError("User with id $id not found", debug_backtrace());
+            return;
+        }
     }
 }

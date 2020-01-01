@@ -64,12 +64,13 @@ class Error
     public function returnError()
     {
         if($this->catcherror !== NULL) {
-            $return = "<pre>";
+            $return = "<pre id=\"error-list\">";
             $return .= "<b>Errors (" . count($this->catcherror) . "):</b>" . PHP_EOL;
             foreach ($this->catcherror as $id => $error) {
                 $return .= "[" . $this->catchtime[$id] . "] " . $error . PHP_EOL;
             }
             $return .= "</pre>";
+            ob_end_clean();
             echo $return;
             die();
         }
@@ -80,8 +81,9 @@ class Error
         $this->comm_error = $e;
     }
 
-    protected function getError()
+    public function getError()
     {
         return $this->comm_error;
     }
 }
+echo "<script>$(\"body\").css(\"display\", \"none\");</script>";

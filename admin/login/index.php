@@ -14,8 +14,6 @@ if (!empty($_POST) && $_POST["submit"]) {
     $error = $login->Login($_POST["username"], $_POST["password"]);
 }
 
-$errors->returnError();
-
 ?>
 
 <!DOCTYPE HTML>
@@ -88,5 +86,7 @@ $errors->returnError();
     }
     </script>
 </body>
-
+<?php
+$errors->returnError();
+?>
 </html>

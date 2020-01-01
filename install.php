@@ -1,7 +1,6 @@
 <?php
 
 use patrick115\Sinusbot\Database;
-use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Install;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
@@ -12,10 +11,9 @@ include __DIR__ . "/src/Class.php";
 
 include __DIR__ . "/src/installer/installs.php";
 
-Session::sessionStart();
-
 if (file_exists(__DIR__ . "/src/installer/install.lock")) {
-    Main::Redirect("./index.php");
+    include "installed.php";
+    exit;
 }
 
 Install::checkVersion();

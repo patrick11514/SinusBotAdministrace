@@ -1,0 +1,154 @@
+@font-face {
+  font-family: QuickSandBold;
+  src: url(Quicksand_Bold.otf);
+}
+@font-face {
+  font-family: QuickSand;
+  src: url(Quicksand_Book.otf);
+}
+@font-face {
+  font-family: Title;
+  src: url(LemonMilkbold.otf);
+}
+.error {
+  background-color:red;
+  max-width: 50%;
+  border-radius: 10px;
+  font-family: Title;
+  font-style: bold;
+}
+button {
+  background-color: #1D1D1D;
+  border: none;
+  border-radius: 10px;
+  width: 20%;
+  color: #FFA500;
+  font-family: QuickSandBold;
+  cursor: pointer;
+  padding: 1%;
+}
+button:focus {
+  outline: none;
+}
+
+.line {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+
+}
+.card > center {
+  margin: 15px;
+}
+
+.card {
+  font-family: QuickSand;
+  color: #181818;
+  background-color: #FFA500;
+  border: 3px solid #FFA500;
+  border-radius: 30px;
+  box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.1);
+  margin-top:5%;
+  max-width:30%;
+}
+.card-a > center {
+  margin: 15px;
+}
+hr {
+  border: 0;
+  border-bottom: solid 2px #1D1D1D;
+}
+.card-a {
+  padding: 10px;
+  font-family: QuickSand;
+  color: #181818;
+  background-color: #FFA500;
+  border: 3px solid #FFA500;
+  border-radius: 2px;
+  box-shadow: 0 5px 10px 0px rgba(0, 0, 0, 0.1);
+  margin-top:5%;
+  max-width:80%;
+  margin-bottom:5%;
+}
+input[type="text"]{
+  text-align: center;
+  color: #FFA500;
+  font-family: QuickSand;
+  font-weight: bold;
+}
+input[type="password"]{
+  text-align: center;
+  color: #FFA500;
+  font-family: QuickSand;
+  font-weight: bold;
+}
+input[type="number"]{
+  text-align: center;
+  color: #FFA500;
+  font-family: QuickSand;
+  font-weight: bold;
+}
+input {
+  background-color: #1D1D1D;
+  border: none;
+  border-radius: 10px;
+  width: 70%;
+  height:8%;
+  font-size: 1.2rem;
+  padding: 1%;
+}
+input:focus {
+  outline: none;
+}
+button {
+  background-color: #1D1D1D;
+  border: none;
+  border-radius: 10px;
+  width: 20%;
+  height: 8%;
+  font-size: 1.2rem;
+  color: #FFA500;
+  font-family: QuickSandBold;
+}
+button:focus {
+  outline: none;
+}
+::placeholder {
+  color: #FFA500;
+  font-family: QuickSandBold;
+}
+body {
+    background-color: #181818;
+    padding: 0;
+    margin: 0;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #181818; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #FFA500; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #bf7e06; 
+}
+select, option {
+  background-color: #181818;
+  color: #FFA500;
+  border: none;
+  outline: none;
+  max-width: 80%;
+}

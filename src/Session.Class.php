@@ -25,6 +25,19 @@ class Session extends Error
         return true;
     }
 
+    public static function destroy()
+    {
+        if (!self::sessionStatus()) {
+            self::init()->catchError("Session is not started!", debug_backtrace());
+            return;
+        }
+        @session_unset();
+        @session_destroy();
+        @session_write_close();
+        @setcookie(session_name(), '', 0, '/');
+        @session_regenerate_id(true);
+    }
+
     public static function get($param)
     {
         if (!self::sessionStatus()) {
@@ -60,7 +73,7 @@ class Session extends Error
         }
 
         if (is_array($param)) {
-            for ($i = 0; $i < (count($param) - 1); $i++) {
+            for ($i = 0; $i <= (count($param) - 1); $i++) {
                 $_SESSION[$param[$i]] = $value[$i];
             }
         } else {

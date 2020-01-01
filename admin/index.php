@@ -2,93 +2,231 @@
 
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
-
+use patrick115\Sinusbot\Stats;
 include "../src/Class.php";
 
 if (!Session::get("logged")) {
-	Main::Redirect("./login");
+    Main::Redirect("login");
 }
-
-$errors->returnError();
 
 ?>
 
-<!DOCTYPE HTML>
-<!--
-	Miniport by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
+<!DOCTYPE html>
 <html>
-	<head>
-		<title>Administration | <?= $_SERVER['SERVER_NAME'] ?></title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-	</head>
-	<body class="is-preload">
 
-		<!-- Nav -->
-			<nav id="nav">
-				<ul class="container">
-					<?//= //Main:: ?>
-					<li><a href="#top">Info</a></li>
-					<li><a href="#work">Work</a></li>
-					<li><a href="#portfolio">Portfolio</a></li>
-					<li><a href="#contact">Contact</a></li>
-				</ul>
-			</nav>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Info | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- Home -->
-			<article id="top" class="wrapper style1">
-				<div class="container">
-					<div class="row">
-						<div class="col-4 col-5-large col-12-medium">
-							<span class="image fit"><img src="images/pic00.jpg" alt="" /></span>
-						</div>
-						<div class="col-8 col-7-large col-12-medium">
-							<header>
-								<h1>Hi. I'm <strong>Jane Doe</strong>.</h1>
-							</header>
-							<p>And this is <strong>Miniport</strong>, a free, fully responsive HTML5 site template designed by <a href="http://twitter.com/ajlkn">AJ</a> for <a href="http://html5up.net">HTML5 UP</a> &amp; released under the <a href="http://html5up.net/license">CCA license</a>.</p>
-							<a href="#work" class="button large scrolly">Learn about what I do</a>
-						</div>
-					</div>
-				</div>
-			</article>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="../images/avatar.png" type="image/x-icon">
+</head>
 
-		<!-- Contact -->
-			<article id="contact" class="wrapper style4">
-				<div class="container medium">
-						<div class="col-12">
-							<ul class="social">
-								<li><a target="_blank" href="https://fb.me/patrick115yt" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-								<li><a target="_blank" href="https://github.com/patrick11514" class="icon brands fa-github"><span class="label">Github</span></a></li>
-								<li><a target="_blank" href="https://patrick115.eu" class="icon solid fa-link"><span class="label">WebPage</span></a></li>
-							</ul>
-						</div>
-					</div>
-					<footer>
-						<ul id="copyright">
-            			    <li>&copy;<?php $release = (int) 2019; if((int) date("Y") > $release){ echo $release . "-" . date("Y");} else {echo date("Y");} ?> <a class="icon brands fa-github"></a><a target="_blank" href="https://github.com/patrick11514">patrick115</a></li>
-            			    </li>
-            			</ul>
-						<br />
-            			<ul id="copyright">
-            			    <li>&copy; Jane Doe</li>
-            			    <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-            			</ul>
-					</footer>
-				</div>
-			</article>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+        </nav>
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Sidebar -->
+            <!-- Brand Logo -->
+            <a href="#" class="brand-link">
+                <img src="../images/avatar.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">SinusBot</span>
+            </a>
 
-	</body>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <img src="../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <a class="d-block"><?= Session::get("username") ?></a>
+                    </div>
+                </div>
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <h3><i class="fas fa-sign-out-alt img-circle elevation-2" style="color:black;padding:5px;"></i>
+                        </h3>
+                    </div>
+                    <div class="info">
+                        <a href="logout" class="d-block">Logout</a>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active">
+                                <i class="nav-icon fas fa-info"></i>
+                                <p>Info</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./bots" class="nav-link">
+                                <i class="nav-icon fas fa-robot"></i>
+                                <p>Bots</p>
+                            </a>
+                        </li>
+                        <li class="nav-item has-treeview selected">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>
+                                    Settings
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="./settings/database" class="nav-link">
+                                        <i class="fas fa-database nav-icon"></i>
+                                        <p>Database</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./settings/bot" class="nav-link">
+                                        <i class="fas fa-robot nav-icon"></i>
+                                        <p>Bot</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./settings/ssh" class="nav-link">
+                                        <i class="fas fa-signal nav-icon"></i>
+                                        <p>SSH</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./settings/other" class="nav-link">
+                                        <i class="fas fa-ellipsis-h nav-icon"></i>
+                                        <p>Other</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Info</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                            </ol>
+                        </div>
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <!-- /.info-box -->
+                        <div class="info-box">
+                            <span class="info-box-icon bg-warning"><i class="fas fa-user-plus"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">Users</span>
+                                <span class="info-box-number"><?= Stats::init()->getRegistredUsers() ?></span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12">
+                        <!-- /.info-box -->
+                        <div class="info-box">
+                            <span class="info-box-icon bg-success"><i class="fas fa-robot"></i></span>
+
+                            <div class="info-box-content">
+                                <span class="info-box-text">Bots</span>
+                                <span class="info-box-number"><?= Stats::init()->getBots() ?></span>
+                            </div>
+                            <!-- /.info-box-content -->
+                        </div>
+                        <!-- /.info-box -->
+                    </div>
+                </div>
+
+
+
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> 3.0.0-rc.5
+            </div>
+            <strong>Copyright &copy; 2014-<span id="year"></span> <a href="http://adminlte.io">AdminLTE.io</a>.</strong>
+            All rights reserved.
+        </footer>
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+</body>
+
+<?php
+$errors->returnError();
+?>
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="plugins/adminlte/adminlte.min.js"></script>
+<!-- Sweat Alerts 2-->
+<script src="plugins/sweetalert2/sweetalert2.all.min.js"></script>
+<!-- Data Tables-->
+<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+<!-- Year Script -->
+<script>
+$('#year').text(new Date().getFullYear());
+</script>
+
 </html>
