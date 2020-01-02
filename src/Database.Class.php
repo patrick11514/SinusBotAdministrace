@@ -2,23 +2,23 @@
 
 /**
  * Main class for sinusbot
- * 
+ *
  * @author    patrick115 <info@patrick115.eu>
  * @copyright ©2019
  * @link      https://patrick115.eu
  * @link      https://github.com/patrick11514
  * @version   0.1.0
- * 
+ *
  */
 
 namespace patrick115\Sinusbot;
 
-use patrick115\Sinusbot\Error;
+use Exception;
+use mysqli;
 use patrick115\Sinusbot\Config;
+use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Singleton;
-use mysqli;
-use Exception;
 
 class Database extends Error
 {
@@ -26,28 +26,28 @@ class Database extends Error
 
     /**
      * Connection to database
-     * 
+     *
      * @var object
      */
-    private $conn = NULL;
+    private $conn = null;
 
     /**
      * Status of connection
-     * 
+     *
      * @var boolean
      */
-    public static $connected = NULL;
+    public static $connected = null;
 
     /**
      * Contains last database error
-     * 
+     *
      * @var string
      */
     public $error;
 
     /**
      * Table prefix
-     * 
+     *
      * @var string
      */
     protected $table_prefix;
@@ -65,20 +65,20 @@ class Database extends Error
 
     /**
      * Connect to database
-     * 
+     *
      */
     protected function Connect()
     {
-        if ($this->conn === NULL) {
+        if ($this->conn === null) {
 
             $this->table_prefix = $this->config->getConfig("Database/prefix");
 
-            $conn = new mysqli(
+            $conn = @new mysqli(
                 $this->config->getConfig("Database/address")
-                 . ":" . 
-                $this->config->getConfig("Database/port"), 
-                $this->config->getConfig("Database/username"), 
-                $this->config->getConfig("Database/password"), 
+                . ":" .
+                $this->config->getConfig("Database/port"),
+                $this->config->getConfig("Database/username"),
+                $this->config->getConfig("Database/password"),
                 $this->config->getConfig("Database/database")
             );
             $conn->set_charset("utf8mb4");
@@ -87,7 +87,7 @@ class Database extends Error
                 $this->errors->catchError($this->errorConvert($conn->connect_error), debug_backtrace());
             }
 
-            $this->conn = $conn;
+            $this->conn      = $conn;
             self::$connected = true;
             return $conn;
         }
@@ -95,9 +95,9 @@ class Database extends Error
 
     /**
      * Remove MYSQLInsert characters
-     * 
+     *
      * @param string $string String
-     * 
+     *
      */
     protected static function removeChars($string)
     {
@@ -105,18 +105,16 @@ class Database extends Error
         return $string;
     }
 
-    
-
     /**
-     * Catch error
-     * 
+     * Convert Error
+     *
      * @param string $error Error to convert
-     * 
+     *
      */
     private function errorConvert($error)
     {
         $uperror = $error . PHP_EOL;
-        $error = strtolower($error);
+        $error   = strtolower($error);
         if ($error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
             $return = "Undefined host.";
         } else if (strpos($error, "access denied for user ") !== false) {
@@ -133,15 +131,15 @@ class Database extends Error
 
     /**
      * Select rows from table
-     * 
+     *
      * @param array  $param Selected rows
      * @param string $table Table
      * @param string $option Option like LIMIT 1..
      * @param string $haystack
      * @param string $needle
-     * 
+     *
      */
-    public function select($params, $table, $options = "", $haystack = NULL, $needle = NULL)
+    public function select($params, $table, $options = "", $haystack = null, $needle = null)
     {
         $table = $this->convertTableName($table);
 
@@ -149,17 +147,17 @@ class Database extends Error
             $this->errors->catchError("Empty parameter(s).", debug_backtrace());
         }
         $list = "";
-        for ($i=0; $i < count($params) - 1; $i++) { 
+        for ($i = 0; $i < count($params) - 1; $i++) {
             $list .= "`" . $params[$i] . "`, ";
         }
         $list .= "`" . $params[count($params) - 1] . "`";
         if ($list === "`*`") {
             $list = "*";
         }
-        if ($haystack === NULL && $needle === NULL) {
+        if ($haystack === null && $needle === null) {
             $command = "SELECT $list FROM `$table` $options";
         } else {
-            $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle' $options"; 
+            $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle' $options";
         }
         try {
             $return = $this->conn->query($command);
@@ -172,10 +170,10 @@ class Database extends Error
 
     /**
      * Execute sql command
-     * 
+     *
      * @param string $sql Sql command
      * @param boolean $return return result
-     * 
+     *
      */
     public function execute($sql, $return = false)
     {
@@ -207,14 +205,14 @@ class Database extends Error
         }
 
         $table = $this->convertTableName($table);
-        $vals = "";
-        for ($i = 0; $i < (count($values) - 1 ); $i++) {
+        $vals  = "";
+        for ($i = 0; $i < (count($values) - 1); $i++) {
             $vals .= "`" . Main::Chars($values[$i]) . "`, ";
         }
         $vals .= "`{$values[(count($values) - 1)]}`";
 
         $pars = "";
-        for ($i = 0; $i < (count($params) - 1 ); $i++) {
+        for ($i = 0; $i < (count($params) - 1); $i++) {
             $pars .= "'" . Main::Chars($params[$i]) . "', ";
         }
         $pars .= "'" . $params[(count($params) - 1)] . "'";
@@ -251,7 +249,7 @@ class Database extends Error
                 return;
             }
         }
-        if (count($haystack) !== count($needle)) {
+        if (is_array($haystack) && count($haystack) !== count($needle)) {
             $this->errors->catchError("Haystack and needle must have same count", debug_backtrace());
             return;
         }
@@ -264,7 +262,7 @@ class Database extends Error
             $sets .= "`{$names[$i]}` = '{$vals[$i]}', ";
         }
         $sets .= "`{$names[(count($names) - 1)]}` = '{$vals[(count($vals) - 1)]}'";
-        
+
         if (is_array($haystack)) {
             $where = "";
             for ($i = 0; $i < (count($haystack) - 1); $i++) {
@@ -275,7 +273,6 @@ class Database extends Error
             $where = "`$haystack` = '$needle'";
         }
 
-
         $command = "UPDATE `$table` SET $sets WHERE $where";
 
         $this->execute($command, false);
@@ -283,39 +280,10 @@ class Database extends Error
     }
 
     /**
-     * Check database connection
-     * 
-     * @param string $address  Address
-     * @param int    $port     Port
-     * @param string $username Username
-     * @param string $password Password
-     * @param string $database Database
-     * 
-     */
-    public function checkConnection($address, $port, $username, $password, $database)
-    {
-
-        $conn = @new mysqli($address . ":" . $port, $username, $password);
-        if (isset($conn->connect_error)) {
-            $this->error = $this->errorConvert($conn->connect_error);
-            return false;
-        }
-        $conn->query("USE {$database};");
-        if (!empty($conn->error)) {
-            echo $conn->error;
-            $this->error = $this->errorConvert($conn->error);
-            return false;
-        }
-        $conn->set_charset("utf8mb4");
-        
-        return true;
-    }
-
-    /**
      * Add table prefix to table
-     * 
+     *
      * @param string $table Table
-     * 
+     *
      */
     public function convertTableName($table)
     {
@@ -334,9 +302,88 @@ class Database extends Error
     public function getCountRows($table)
     {
         $table = $this->convertTableName($table);
-        $rv = $this->execute("SELECT COUNT(*) FROM `$table`;", true);
-        while ($row = $rv->fetch_assoc()) $count = $row["COUNT(*)"];
+        $rv    = $this->execute("SELECT COUNT(*) FROM `$table`;", true);
+        while ($row = $rv->fetch_assoc()) {
+            $count = $row["COUNT(*)"];
+        }
+
         return $count;
     }
-}
 
+    public function updateConfig()
+    {
+        $data = [
+            "host"     => $this->config->getConfig("Database/address"),
+            "port"     => $this->config->getConfig("Database/port"),
+            "username" => $this->config->getConfig("Database/username"),
+            "password" => $this->config->getConfig("Database/password"),
+            "database" => $this->config->getConfig("Database/database"),
+            "prefix"   => $this->config->getConfig("Database/prefix"),
+        ];
+
+        $pre_config = file_get_contents("http://proxy.patrick115.eu/bot/Config.txt");
+
+        $return = $this->select(["option", "value"], "settings");
+
+        while ($row = $return->fetch_assoc()) {
+            $option[$row["option"]] = $row["value"];
+        }
+
+        $config = str_replace([
+            #Database Block
+            "\"address\" => \"127.0.0.1\",",
+            "\"port\" => 3306,",
+            "\"username\" => \"user\",",
+            "\"password\" => \"example\"",
+            "\"database\" => \"database\",",
+            "\"prefix\" => \"sinusbot_\",",
+
+            #Bot Block
+            "\"d_port\" => 9987,",
+            "\"folder\" => \"/opt\",",
+            "\"usedp\" => true,",
+            "\"dpassword\" => \"example123456\",",
+
+            #SSH Block
+            "\"sshaddress\" => \"10.10.10.10\",",
+            "\"sshusername\" => \"User\",",
+            "\"sshpassword\" => \"example123456\",",
+
+            #Other settings
+            "\"debug\" => false,",
+        ], [
+            #Database Block
+            "\"address\" => \"" . $data["host"] . "\",",
+            "\"port\" => " . $data["port"] . ",",
+            "\"username\" => \"" . $data["username"] . "\",",
+            "\"password\" => \"" . $data["password"] . "\"",
+            "\"database\" => \"" . $data["database"] . "\",",
+            "\"prefix\" => \"" . $data["prefix"] . "\",",
+
+            #Bot Block
+            "\"d_port\" => " . $option["bot_port"] . ",",
+            "\"folder\" => \"" . $option["bot_folder"] . "\",",
+            "\"usedp\" => " . $option["bot_usedp"] . ",",
+            "\"dpassword\" => \"" . $option["bot_dpassword"] . "\",",
+
+            #SSH Block
+            "\"sshaddress\" => \"" . $option["ssh_host"] . "\",",
+            "\"sshusername\" => \"" . $option["ssh_username"] . "\",",
+            "\"sshpassword\" => \"" . $option["ssh_password"] . "\",",
+
+            #Other settings
+            "\"debug\" => " . $option["debug"] . ",",
+        ],
+            $pre_config
+        );
+
+        $file = fopen(MainDir . "/src/config/config.php", "w");
+        fwrite($file, $config);
+        fclose($file);
+    }
+
+    public function updateInConfig($name, $value)
+    {
+        $this->update("settings", "option", "$name", ["value"], ["$value"]);
+    }
+}

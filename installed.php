@@ -9,8 +9,6 @@ if ($installer !== true) {
     die();
 }
 
-include __DIR__ . "/src/Class.php";
-
 if (empty($_GET["part"])) {
     Main::Redirect("./install.php?part=1");
     Session::destroy();
@@ -31,7 +29,7 @@ if (empty($_SESSION["data"])) {
 
 $part = Main::Chars($_GET["part"]);
 
-if ($_SESSION["data"][$part - 1] === false && $part > 1) {
+if (isset($_SESSION["data"][$part - 1]) && $_SESSION["data"][$part - 1] === false && $part > 1) {
     Main::Redirect("./install.php?part=" . ($part - 1));
 } 
 

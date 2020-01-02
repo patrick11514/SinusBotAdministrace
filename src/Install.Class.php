@@ -17,6 +17,7 @@ use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
 use ZipArchive;
+use mysqli;
 
 class Install extends Database
 {
@@ -27,7 +28,9 @@ class Install extends Database
      */
     public static $lasterror;
 
+    public static $mysql_error;
 
+    public static $ssh_error;
 
     /**
      * Validate form inputs from 1st part
@@ -47,8 +50,6 @@ class Install extends Database
 
         return true;
     }
-
-
 
     /**
      * Validate form inputs from 2nd part
@@ -161,6 +162,75 @@ class Install extends Database
         }
     }
 
+        /**
+     * Check database connection
+     * 
+     * @param string $address  Address
+     * @param int    $port     Port
+     * @param string $username Username
+     * @param string $password Password
+     * @param string $database Database
+     * 
+     */
+    public static function checkConnection($address, $port, $username, $password, $database)
+    {
+
+        $conn = @new mysqli($address . ":" . $port, $username, $password);
+        if (isset($conn->connect_error)) {
+            if ($conn->connect_error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
+                $return = "Undefined host.";
+            } else if (strpos($conn->connect_error, "access denied for user ") !== false) {
+                $return = "Incorrect Login Data";
+            } else if ($conn->connect_error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
+                $return = "Please use valid host";
+            } else if ($conn->connect_error == "php_network_getaddresses: getaddrinfo failed: name or service not known") {
+                $return = "Please use valid host";
+            } else if (strpos($conn->connect_error, "unknown database") !== false) {
+                $return = "Database " . explode("'", $conn->connect_error . PHP_EOL)[1] . " not found! Please create it";
+            }
+            self::$mysql_error = $return;
+            return false;
+        }
+        $conn->query("USE {$database};");
+        if (!empty($conn->error)) {
+            if ($conn->error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
+                $return = "Undefined host.";
+            } else if (strpos($conn->error, "access denied for user ") !== false) {
+                $return = "Incorrect Login Data";
+            } else if ($conn->error == "php_network_getaddresses: getaddrinfo failed: no address associated with hostname") {
+                $return = "Please use valid host";
+            } else if ($conn->error == "php_network_getaddresses: getaddrinfo failed: name or service not known") {
+                $return = "Please use valid host";
+            } else if (strpos($conn->error, "unknown database") !== false) {
+                $return = "Database " . explode("'", $conn->error . PHP_EOL)[1] . " not found! Please create it";
+            }
+            self::$mysql_error = $return;
+            return false;
+        }
+        $conn->set_charset("utf8mb4");
+        
+        return true;
+    }
+
+    public static function checkSSH($host, $username, $password)
+    {
+        $error = null;
+        $errorno = null;
+
+        fsockopen($host, 22, $errorno, $error);
+
+        if (!empty($error)) {
+            self::$ssh_error = "Can't connect to {$host}:22";
+            return false;
+        }
+        $connection = @ssh2_connect($host, 22);
+        
+        if (!@ssh2_auth_password($connection, $username, $password)) {
+            self::$ssh_error = "Can't auth to {$username}@{$host}";
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Install and prepare administration for use.
@@ -170,10 +240,6 @@ class Install extends Database
      */
     public static function Install_bot($dir)
     {
-
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
 
         if (file_exists(__DIR__ . "/../sinusbot_latest.zip")) {
             unlink(__DIR__ . "/../sinusbot_latest.zip");
@@ -193,13 +259,29 @@ class Install extends Database
 
         echo "<script>$(\"#log\").text(\"Prepairing SQL..\");</script>";
         
+        $config = Config::init();
+
         $content = file_get_contents(__DIR__ . "/installer/sql.txt");
         $content = str_replace([
                         "<%DATABASE%>",
                         "<%PREFIX%>",
+                        "%bot_port_value%",
+                        "%bot_folder%",
+                        "%bot_usedp%",
+                        "%bot_dpassword%",
+                        "%ssh_host%",
+                        "%ssh_username%",
+                        "%ssh_password%"
                     ], [
-                        Config::init()->getConfig("Database/database"),
-                        Config::init()->getConfig("Database/prefix"),
+                        $config->getConfig("Database/database"),
+                        $config->getConfig("Database/prefix"),
+                        $config->getConfig("Bot/d_port"),
+                        $config->getConfig("Bot/folder"),
+                        Main::booltostring($config->getConfig("Bot/usedp")),
+                        $config->getConfig("Bot/dpassword"),
+                        $config->getConfig("SSH/sshaddress"),
+                        $config->getConfig("SSH/sshusername"),
+                        $config->getConfig("SSH/sshpassword")
                     ],
         				$content
         		    );
@@ -290,7 +372,7 @@ class Install extends Database
         echo "<script>$(\"#log\").text(\"Cleaning temp files...\");</script>";
         
         foreach (glob(__DIR__ . "/../temp_*.txt") as $file) {
-            unlink($file);
+            #unlink($file);
         }
 
         $file = fopen(__DIR__ . "/installer/install.lock", "w");
@@ -306,9 +388,6 @@ class Install extends Database
 
     public function run_reinstall()
     {
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
 
         $init = Database::init();
 

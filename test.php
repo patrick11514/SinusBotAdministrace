@@ -1,9 +1,11 @@
 <?php
+use patrick115\Sinusbot\Install;
+use patrick115\Sinusbot\Database;
 
-if (file_exists("/var/www")) {
-    echo "a";
-} else {
-    echo "b";
-}
+$installer = true;
+
+include __DIR__ . "/src/Class.php";
+
+Database::init()->updateConfig();
 
 ?>

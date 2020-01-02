@@ -2,6 +2,7 @@
 
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Database;
 
 include "../../../src/Class.php";
 
@@ -23,12 +24,8 @@ if (!is_numeric($_POST["d_port"])) {
     Main::Redirect("./?edit&error=Default port must be numeric");
 }
 
-$config = file_get_contents(MainDir . "/src/config/config.php");
-
-$bot = Config::init()->getConfig("Bot");
-
-if (Main::Chars($_POST["dpassword"]) === Main::Chars(Main::hide($bot["dpassword"]))) {
-    $post["dpassword"] = $bot["dpassword"];
+if (Main::Chars($_POST["dpassword"]) === Main::Chars(Main::hide(Config::init()->getConfig("Bot/dpassword")))) {
+    $post["dpassword"] = Config::init()->getConfig("Bot/dpassword");
     unset($_POST["dpassword"]);
 }
 
@@ -37,27 +34,14 @@ foreach ($_POST as $name => $value)
     $post[$name] = Main::Chars($value);
 }
 
-$config = str_replace(
-    [
-        "\"d_port\" => {$bot["d_port"]},",
-        "\"folder\" => \"{$bot["folder"]}\",",
-        "\"usedp\" => " . Main::booltostring($bot["usedp"]) . ",",
-        "\"dpassword\" => \"{$bot["dpassword"]}\",",
-    ],
-    [
-        "\"d_port\" => {$post["d_port"]},",
-        "\"folder\" => \"{$post["folder"]}\",",
-        "\"usedp\" => {$post["usedp"]},",
-        "\"dpassword\" => \"{$post["dpassword"]}\",",
-    ],
-    $config
-);
+$db = Database::init();
 
+$db->updateInConfig("bot_port", $post["d_port"]);
+$db->updateInConfig("bot_folder", $post["folder"]);
+$db->updateInConfig("bot_usedp", $post["usedp"]);
+$db->updateInConfig("bot_dpassword", $post["dpassword"]);
 
-unlink(MainDir . "/src/config/config.php");
-$file = fopen(MainDir . "/src/config/config.php", "w");
-fwrite($file, $config);
-fclose($file);
+$db->updateConfig();
 
 if(extension_loaded("Zend OPcache")){
     opcache_invalidate(MainDir . "/src/config/config.php", true);

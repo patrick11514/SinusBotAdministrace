@@ -14,6 +14,30 @@ $db = [
     "debug" => Main::booltostring(Config::init()->getConfig("debug")),
 ];
 
+$nav = [
+    "info"     => "../../",
+    "bots"     => "../../bots",
+    "settings" => [
+        "database" => "./database",
+        "bot"      => "../bot",
+        "ssh"      => "../ssh",
+        "other"    => "#",
+    ],
+];
+
+$active = [
+    "info"       => "",
+    "bots"       => "",
+    "settings_s" => "active",
+    "settings"   => [
+        "database" => "",
+        "bot"      => "",
+        "ssh"      => "",
+        "other"    => "active",
+    ],
+];
+
+
 ?>
 
 <!DOCTYPE html>
@@ -83,61 +107,9 @@ $db = [
                 </div>
 
                 <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item">
-                            <a href="../../" class="nav-link">
-                                <i class="nav-icon fas fa-info"></i>
-                                <p>Info</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../../bots" class="nav-link">
-                                <i class="nav-icon fas fa-robot"></i>
-                                <p>Bots</p>
-                            </a>
-                        </li>
-                        <li class="nav-item has-treeview menu-open">
-                            <a href="#" class="nav-link active">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Settings
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="../database" class="nav-link">
-                                        <i class="fas fa-database nav-icon"></i>
-                                        <p>Database</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../bot" class="nav-link">
-                                        <i class="fas fa-robot nav-icon"></i>
-                                        <p>Bot</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../ssh" class="nav-link">
-                                        <i class="fas fa-signal nav-icon"></i>
-                                        <p>SSH</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#r" class="nav-link active">
-                                        <i class="fas fa-ellipsis-h nav-icon"></i>
-                                        <p>Other</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+                <?php include MainDir . "/src/includes/sidebar.php"?>
                 <!-- /.sidebar-menu -->
             </div>
-            <!-- /.sidebar -->
             <!-- /.sidebar -->
         </aside>
 

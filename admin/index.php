@@ -9,6 +9,29 @@ if (!Session::get("logged")) {
     Main::Redirect("login");
 }
 
+$nav = [
+    "info"     => "#",
+    "bots"     => "./bots",
+    "settings" => [
+        "database" => "./settings/database",
+        "bot"      => "./settings/bot",
+        "ssh"      => "./settings/ssh",
+        "other"    => "./settings/other",
+    ],
+];
+
+$active = [
+    "info"       => "active",
+    "bots"       => "",
+    "settings_s" => "",
+    "settings"   => [
+        "database" => "",
+        "bot"      => "",
+        "ssh"      => "",
+        "other"    => "",
+    ],
+];
+
 ?>
 
 <!DOCTYPE html>
@@ -17,7 +40,7 @@ if (!Session::get("logged")) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Info | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <title>Info | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -64,7 +87,7 @@ if (!Session::get("logged")) {
                         <img src="../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a class="d-block"><?= Session::get("username") ?></a>
+                        <a class="d-block"><?=Session::get("username")?></a>
                     </div>
                 </div>
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
@@ -78,61 +101,9 @@ if (!Session::get("logged")) {
                 </div>
 
                 <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link active">
-                                <i class="nav-icon fas fa-info"></i>
-                                <p>Info</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="./bots" class="nav-link">
-                                <i class="nav-icon fas fa-robot"></i>
-                                <p>Bots</p>
-                            </a>
-                        </li>
-                        <li class="nav-item has-treeview selected">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Settings
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="./settings/database" class="nav-link">
-                                        <i class="fas fa-database nav-icon"></i>
-                                        <p>Database</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="./settings/bot" class="nav-link">
-                                        <i class="fas fa-robot nav-icon"></i>
-                                        <p>Bot</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="./settings/ssh" class="nav-link">
-                                        <i class="fas fa-signal nav-icon"></i>
-                                        <p>SSH</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="./settings/other" class="nav-link">
-                                        <i class="fas fa-ellipsis-h nav-icon"></i>
-                                        <p>Other</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+                <?php include MainDir . "/src/includes/sidebar.php"?>
                 <!-- /.sidebar-menu -->
             </div>
-            <!-- /.sidebar -->
             <!-- /.sidebar -->
         </aside>
 
@@ -163,7 +134,7 @@ if (!Session::get("logged")) {
 
                             <div class="info-box-content">
                                 <span class="info-box-text">Users</span>
-                                <span class="info-box-number"><?= Stats::init()->getRegistredUsers() ?></span>
+                                <span class="info-box-number"><?=Stats::init()->getRegistredUsers()?></span>
                             </div>
                             <!-- /.info-box-content -->
                         </div>
@@ -176,7 +147,7 @@ if (!Session::get("logged")) {
 
                             <div class="info-box-content">
                                 <span class="info-box-text">Bots</span>
-                                <span class="info-box-number"><?= Stats::init()->getBots() ?></span>
+                                <span class="info-box-number"><?=Stats::init()->getBots()?></span>
                             </div>
                             <!-- /.info-box-content -->
                         </div>

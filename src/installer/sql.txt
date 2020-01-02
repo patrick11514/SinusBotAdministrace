@@ -1,7 +1,7 @@
-CREATE TABLE `<%DATABASE%>`.`<%PREFIX%>users` ( `id` INT NOT NULL AUTO_INCREMENT , `username` VARCHAR(30) NOT NULL , `password` VARCHAR(80) NOT NULL , `register_ip` VARCHAR(15) NOT NULL , `last_ip` VARCHAR(15) NOT NULL , `bot_id` INT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
+CREATE TABLE `<%DATABASE%>`.`<%PREFIX%>users` ( `id` INT NOT NULL AUTO_INCREMENT , `username` VARCHAR(30) NOT NULL , `password` VARCHAR(80) NOT NULL , `register_ip` VARCHAR(40) NOT NULL , `last_ip` VARCHAR(40) NOT NULL , `bot_id` INT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
 CREATE TABLE `<%DATABASE%>`.`<%PREFIX%>bots` ( `id` INT NOT NULL AUTO_INCREMENT , `owner` INT NOT NULL , `password` VARCHAR(30) NOT NULL , `port` INT NOT NULL , `status` VARCHAR(5) NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
 ALTER TABLE `<%DATABASE%>`.`<%PREFIX%>bots` ADD CONSTRAINT `owner_id` FOREIGN KEY (`owner`) REFERENCES `<%PREFIX%>users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 CREATE TABLE `<%DATABASE%>`.`<%PREFIX%>settings` ( `id` INT NOT NULL AUTO_INCREMENT , `option` TEXT NOT NULL , `value` TEXT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
 /* Insert Settings */
-
+INSERT INTO `sinusbot_settings` (`id`, `option`, `value`) VALUES (NULL, 'bot_port', '%bot_port_value%'), (NULL, 'bot_folder', '%bot_folder%'), (NULL, 'bot_usedp', '%bot_usedp%'), (NULL, 'bot_dpassword', '%bot_dpassword%'), (NULL, 'ssh_host', '%ssh_host%'), (NULL, 'ssh_username', '%ssh_username%'), (NULL, 'ssh_password', '%ssh_password%'), (NULL, 'debug', 'false')
 /* ---------------- */

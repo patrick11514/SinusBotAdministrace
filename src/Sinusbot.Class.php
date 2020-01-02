@@ -16,6 +16,7 @@ namespace patrick115\Sinusbot;
 use patrick115\Sinusbot\Error;
 use patrick115\Sinusbot\Singleton;
 use patrick115\Sinusbot\Database;
+use patrick115\Sinusbot\Main;
 
 class Sinusbot extends Error
 {
@@ -23,9 +24,12 @@ class Sinusbot extends Error
 
     private $database;
 
+    private $main;
+
     private function __construct()
     {
         $this->database = Database::init();
+        $this->main = new Main();
     }
 
     public static function generateConfig(int $port, $folder)
@@ -62,7 +66,7 @@ class Sinusbot extends Error
                 $return .= "
                 <tr>
                     <td>{$row["id"]}</td>
-                    <td>" . Main::getUserByID($row["owner"]) . "</td>
+                    <td>" . $this->main->getUserByID($row["owner"]) . "</td>
                     <td>{$row["port"]}</td>
                     <td>" . $this->convertStatus($row["status"]) . "</td>
                 </tr>";

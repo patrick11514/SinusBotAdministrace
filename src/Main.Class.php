@@ -45,7 +45,7 @@ class Main extends Database
 
     private $error_c;
 
-    private $database_c;
+    private $database;
 
     /**
      * On construct connect to database
@@ -53,7 +53,7 @@ class Main extends Database
      */
     public function __construct()
     {
-        $this->database_c = Database::init();
+        $this->database = Database::init();
         $this->config = Config::init();
         $this->error_c = Error::init();
     }

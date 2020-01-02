@@ -14,7 +14,30 @@ $db = [
     "d_port"    => Config::init()->getConfig("Bot/d_port"),
     "folder"    => Config::init()->getConfig("Bot/folder"),
     "usedp"     => Main::booltostring(Config::init()->getConfig("Bot/usedp")),
-    "dpassword" => Main::hide(Config::init()->getConfig("Bot/dpassword"))
+    "dpassword" => Main::hide(Config::init()->getConfig("Bot/dpassword")),
+];
+
+$nav = [
+    "info"     => "../../",
+    "bots"     => "../../bots",
+    "settings" => [
+        "database" => "../database",
+        "bot"      => "#",
+        "ssh"      => "../ssh",
+        "other"    => "../other",
+    ],
+];
+
+$active = [
+    "info"       => "",
+    "bots"       => "",
+    "settings_s" => "active",
+    "settings"   => [
+        "database" => "",
+        "bot"      => "active",
+        "ssh"      => "",
+        "other"    => "",
+    ],
 ];
 
 ?>
@@ -25,7 +48,7 @@ $db = [
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Settings | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <title>Settings | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -72,7 +95,7 @@ $db = [
                         <img src="../../../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a class="d-block"><?= Session::get("username") ?></a>
+                        <a class="d-block"><?=Session::get("username")?></a>
                     </div>
                 </div>
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
@@ -86,61 +109,9 @@ $db = [
                 </div>
 
                 <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item">
-                            <a href="../../" class="nav-link">
-                                <i class="nav-icon fas fa-info"></i>
-                                <p>Info</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../../bots" class="nav-link">
-                                <i class="nav-icon fas fa-robot"></i>
-                                <p>Bots</p>
-                            </a>
-                        </li>
-                        <li class="nav-item has-treeview menu-open">
-                            <a href="#" class="nav-link active">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Settings
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="../database" class="nav-link">
-                                        <i class="fas fa-database nav-icon"></i>
-                                        <p>Database</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link active">
-                                        <i class="fas fa-robot nav-icon"></i>
-                                        <p>Bot</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../ssh" class="nav-link">
-                                        <i class="fas fa-signal nav-icon"></i>
-                                        <p>SSH</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../other" class="nav-link">
-                                        <i class="fas fa-ellipsis-h nav-icon"></i>
-                                        <p>Other</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+                <?php include MainDir . "/src/includes/sidebar.php"?>
                 <!-- /.sidebar-menu -->
             </div>
-            <!-- /.sidebar -->
             <!-- /.sidebar -->
         </aside>
 
@@ -167,31 +138,31 @@ $db = [
                     <div class="card-body">
                     <h2>Bot</h2>
                         <?php if (!isset($_GET["edit"])): ?>
-                        <h5>Default Port:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["d_port"] ?></code></h5>
-                        <h5>Folder:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["folder"] ?></code></h5>
-                        <h5>Use Default Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["usedp"] ?></code></h5>
-                        <h5>Default Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["dpassword"] ?></code></h5>
+                        <h5>Default Port:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["d_port"]?></code></h5>
+                        <h5>Folder:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["folder"]?></code></h5>
+                        <h5>Use Default Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["usedp"]?></code></h5>
+                        <h5>Default Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["dpassword"]?></code></h5>
                         <a href="./?edit"><button type="button" class="btn btn-primary">Edit</button></a>
                         <?php else: ?>
                         <?php if (isset($_GET["error"])): ?>
-                            <h4 style="color:red"><?= Main::Chars($_GET["error"]) ?></h4>
-                        <?php endif; ?>
+                            <h4 style="color:red"><?=Main::Chars($_GET["error"])?></h4>
+                        <?php endif;?>
                         <form action="./proceed.php" method="post">
                         <div class="form-group">
                             <label for="d_port">Default Port</label>
-                            <input type="text" class="form-control" id="d_port" value="<?= $db["d_port"] ?>" name="d_port" required>
+                            <input type="text" class="form-control" id="d_port" value="<?=$db["d_port"]?>" name="d_port" required>
                         </div>
                         <div class="form-group">
                             <label for="folder">Folder</label>
-                            <input type="text" class="form-control" id="folder" value="<?= $db["folder"] ?>" name="folder" required>
+                            <input type="text" class="form-control" id="folder" value="<?=$db["folder"]?>" name="folder" required>
                         </div>
                         <div class="form-group">
                             <label for="usedp">Use Default Password</label>
-                            <input type="text" class="form-control" id="usedp" value="<?= $db["usedp"] ?>" name="usedp" required>
+                            <input type="text" class="form-control" id="usedp" value="<?=$db["usedp"]?>" name="usedp" required>
                         </div>
                         <div class="form-group">
                             <label for="dpassword">Default Password</label>
-                            <input type="text" class="form-control" id="dpassword" value="<?= $db["dpassword"] ?>" name="dpassword" required>
+                            <input type="text" class="form-control" id="dpassword" value="<?=$db["dpassword"]?>" name="dpassword" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Update</button>
                         <a href="./"><button type="button" class="btn btn-primary">Back</button></a>

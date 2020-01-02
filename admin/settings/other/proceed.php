@@ -2,6 +2,7 @@
 
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Database;
 
 include "../../../src/Class.php";
 
@@ -26,24 +27,11 @@ foreach ($_POST as $name => $value)
     $post[$name] = Main::Chars($value);
 }
 
-$debug = Main::booltostring(Config::init()->getConfig("debug"));
+$db = Database::init();
 
+$db->updateInConfig("debug", $post["debug"]);
 
-
-$config = str_replace(
-    [
-        "\"debug\" => {$debug},",
-    ],
-    [
-        "\"debug\" => {$post["debug"]},",
-    ],
-    $config
-);
-
-unlink(MainDir . "/src/config/config.php");
-$file = fopen(MainDir . "/src/config/config.php", "w");
-fwrite($file, $config);
-fclose($file);
+$db->updateConfig();
 
 if(extension_loaded("Zend OPcache")){
     opcache_invalidate(MainDir . "/src/config/config.php", true);

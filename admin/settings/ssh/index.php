@@ -11,9 +11,32 @@ if (!Session::get("logged")) {
 }
 
 $db = [
-    "host"  => Config::init()->getConfig("SSH/sshaddress"),
+    "host"     => Config::init()->getConfig("SSH/sshaddress"),
     "username" => Config::init()->getConfig("SSH/sshusername"),
-    "password" =>   Main::hide(Config::init()->getConfig("SSH/sshpassword")),
+    "password" => Main::hide(Config::init()->getConfig("SSH/sshpassword")),
+];
+
+$nav = [
+    "info"     => "../../",
+    "bots"     => "../../bots",
+    "settings" => [
+        "database" => "../database",
+        "bot"      => "../bot",
+        "ssh"      => "#",
+        "other"    => "../other",
+    ],
+];
+
+$active = [
+    "info"       => "",
+    "bots"       => "",
+    "settings_s" => "active",
+    "settings"   => [
+        "database" => "",
+        "bot"      => "",
+        "ssh"      => "active",
+        "other"    => "",
+    ],
 ];
 
 ?>
@@ -24,7 +47,7 @@ $db = [
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Settings | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <title>Settings | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -71,7 +94,7 @@ $db = [
                         <img src="../../../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a class="d-block"><?= Session::get("username") ?></a>
+                        <a class="d-block"><?=Session::get("username")?></a>
                     </div>
                 </div>
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
@@ -85,61 +108,9 @@ $db = [
                 </div>
 
                 <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item">
-                            <a href="../../" class="nav-link">
-                                <i class="nav-icon fas fa-info"></i>
-                                <p>Info</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="../../bots" class="nav-link">
-                                <i class="nav-icon fas fa-robot"></i>
-                                <p>Bots</p>
-                            </a>
-                        </li>
-                        <li class="nav-item has-treeview menu-open">
-                            <a href="#" class="nav-link active">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Settings
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="../database" class="nav-link">
-                                        <i class="fas fa-database nav-icon"></i>
-                                        <p>Database</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../bot" class="nav-link">
-                                        <i class="fas fa-robot nav-icon"></i>
-                                        <p>Bot</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link active">
-                                        <i class="fas fa-signal nav-icon"></i>
-                                        <p>SSH</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="../other" class="nav-link">
-                                        <i class="fas fa-ellipsis-h nav-icon"></i>
-                                        <p>Other</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+                <?php include MainDir . "/src/includes/sidebar.php"; ?>
                 <!-- /.sidebar-menu -->
             </div>
-            <!-- /.sidebar -->
             <!-- /.sidebar -->
         </aside>
 
@@ -166,26 +137,26 @@ $db = [
                     <div class="card-body">
                     <h2>SSH</h2>
                         <?php if (!isset($_GET["edit"])): ?>
-                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["host"] ?></code></h5>
-                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["username"] ?></code></h5>
-                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["password"] ?></code></h5>
+                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["host"]?></code></h5>
+                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["username"]?></code></h5>
+                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["password"]?></code></h5>
                         <a href="./?edit"><button type="button" class="btn btn-primary">Edit</button></a>
                         <?php else: ?>
                         <?php if (isset($_GET["error"])): ?>
-                            <h4 style="color:red"><?= Main::Chars($_GET["error"]) ?></h4>
-                        <?php endif; ?>
+                            <h4 style="color:red"><?=Main::Chars($_GET["error"])?></h4>
+                        <?php endif;?>
                         <form action="./proceed.php" method="post">
                         <div class="form-group">
                             <label for="host">Host</label>
-                            <input type="text" class="form-control" id="host" value="<?= $db["host"] ?>" name="host" required>
+                            <input type="text" class="form-control" id="host" value="<?=$db["host"]?>" name="host" required>
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" value="<?= $db["username"] ?>" name="username" required>
+                            <input type="text" class="form-control" id="username" value="<?=$db["username"]?>" name="username" required>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="text" class="form-control" id="password" value="<?= $db["password"] ?>" name="password" required>
+                            <input type="text" class="form-control" id="password" value="<?=$db["password"]?>" name="password" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Update</button>

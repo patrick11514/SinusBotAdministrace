@@ -3,7 +3,6 @@
 use patrick115\Sinusbot\Database;
 use patrick115\Sinusbot\Install;
 use patrick115\Sinusbot\Main;
-use patrick115\Sinusbot\Session;
 
 $installer = true;
 
@@ -71,7 +70,7 @@ if ($check === false) {
 if (isset($_POST["submit"])) {
     if ($part == 1) {
         if (Install::validate_1($_POST)) {
-            if (Database::init()->checkConnection(
+            if (Install::checkConnection(
                 Main::Chars($_POST["address"]),
                 Main::Chars($_POST["port"]),
                 Main::Chars($_POST["username"]),
@@ -111,7 +110,7 @@ if (isset($_POST["submit"])) {
                     $error = "Database contains some tables, please remove them.";
                 }   
             } else {
-                $error = Database::init()->error;
+                $error = Install::$mysql_error;
             }
         } else {
             $error = Install::$lasterror;
@@ -137,13 +136,21 @@ if (isset($_POST["submit"])) {
         }
     } else if ($part == 3) {
         if (Install::validate_3($_POST)) {
-            $_SESSION["data"]["ssh"] = [
-                "address" => Main::Chars($_POST["address"]),
-                "username" => Main::Chars($_POST["username"]),
-                "password" => Main::Chars($_POST["password"])
-            ];
-            $_SESSION["data"][3] = true;
-            Main::Redirect("./install.php?setup=4");
+            if (Install::checkSSH(
+                Main::Chars($_POST["address"]),
+                Main::Chars($_POST["username"]),
+                Main::Chars($_POST["password"])
+            )) {
+                $_SESSION["data"]["ssh"] = [
+                    "address" => Main::Chars($_POST["address"]),
+                    "username" => Main::Chars($_POST["username"]),
+                    "password" => Main::Chars($_POST["password"])
+                ];
+                $_SESSION["data"][3] = true;
+                Main::Redirect("./install.php?setup=4");
+            } else {
+                $error = Install::$ssh_error;
+            }
         } else {
             $error = Install::$lasterror;
         }
@@ -173,9 +180,9 @@ if (isset($_POST["submit"])) {
                 "\"dpassword\" => \"example123456\",",
 
                 #SSH Block
-                "\"address\" => \"10.10.10.10\",",
-                "\"username\" => \"User\",",
-                "\"password\" => \"example123456\","
+                "\"sshaddress\" => \"10.10.10.10\",",
+                "\"sshusername\" => \"User\",",
+                "\"sshpassword\" => \"example123456\","
             ], [
                 #Database Block
                 "\"address\" => \"" . $_SESSION["data"]["database"]["address"] . "\",",
@@ -192,9 +199,9 @@ if (isset($_POST["submit"])) {
                 "\"dpassword\" => \"" . $_SESSION["data"]["bot"]["dpassword"] . "\",",
 
                 #SSH Block
-                "\"address\" => \"" . $_SESSION["data"]["ssh"]["address"] . "\",",
-                "\"username\" => \"" . $_SESSION["data"]["ssh"]["username"] . "\",",
-                "\"password\" => \"" . $_SESSION["data"]["ssh"]["password"] . "\","
+                "\"sshaddress\" => \"" . $_SESSION["data"]["ssh"]["address"] . "\",",
+                "\"sshusername\" => \"" . $_SESSION["data"]["ssh"]["username"] . "\",",
+                "\"sshpassword\" => \"" . $_SESSION["data"]["ssh"]["password"] . "\","
             ],
                 $config
             );

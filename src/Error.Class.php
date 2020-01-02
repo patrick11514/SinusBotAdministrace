@@ -86,4 +86,3 @@ class Error
         return $this->comm_error;
     }
 }
-echo "<script>$(\"body\").css(\"display\", \"none\");</script>";
