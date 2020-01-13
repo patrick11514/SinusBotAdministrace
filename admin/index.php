@@ -10,9 +10,10 @@ if (!Session::get("logged")) {
 }
 
 $nav = [
-    "info"     => "#",
-    "bots"     => "./bots",
-    "settings" => [
+    "info"       => "#",
+    "bots"       => "./bots",
+    "createuser" => "./addusr",
+    "settings"   => [
         "database" => "./settings/database",
         "bot"      => "./settings/bot",
         "ssh"      => "./settings/ssh",
@@ -23,6 +24,7 @@ $nav = [
 $active = [
     "info"       => "active",
     "bots"       => "",
+    "createuser" => "",
     "settings_s" => "",
     "settings"   => [
         "database" => "",

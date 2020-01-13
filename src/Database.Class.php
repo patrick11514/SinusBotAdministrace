@@ -154,11 +154,13 @@ class Database extends Error
         if ($list === "`*`") {
             $list = "*";
         }
+
         if ($haystack === null && $needle === null) {
             $command = "SELECT $list FROM `$table` $options";
         } else {
             $command = "SELECT $list FROM `$table` WHERE `$haystack` = '$needle' $options";
         }
+
         try {
             $return = $this->conn->query($command);
         } catch (Exception $e) {
@@ -277,6 +279,43 @@ class Database extends Error
 
         $this->execute($command, false);
 
+    }
+
+    public function delete($table, $haystack, $needle)
+    {
+        if (is_array($haystack)) {
+            if (!is_array($needle)) {
+                $this->errors->catchError("If haystack is array, needle must be too", debug_backtrace());
+                return;
+            }
+        }
+        if (is_array($needle)) {
+            if (!is_array($haystack)) {
+                $this->errors->catchError("If needle is array, haystack must be too", debug_backtrace());
+                return;
+            }
+        }
+        if (is_array($haystack) && count($haystack) !== count($needle)) {
+            $this->errors->catchError("Haystack and needle must have same count", debug_backtrace());
+            return;
+        }
+
+        $table = $this->convertTableName($table);
+
+        $cond = "";
+
+        for ($i = 0; $i < count($haystack); $i++)
+        {
+            if (is_int($needle[$i])) {
+                $cond .= "`$table`.`{$haystack[$i]}` = {$needle[$i]}";
+            } else {
+                $cond .= "`$table`.`{$haystack[$i]}` = '{$needle[$i]}'";
+            }
+        }
+        
+        $command = "DELETE FROM `$table` WHERE {$cond};";
+        
+        $this->execute($command);
     }
 
     /**

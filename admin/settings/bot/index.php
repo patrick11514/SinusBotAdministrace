@@ -18,9 +18,10 @@ $db = [
 ];
 
 $nav = [
-    "info"     => "../../",
-    "bots"     => "../../bots",
-    "settings" => [
+    "info"       => "../../",
+    "bots"       => "../../bots",
+    "createuser" => "../../addusr",
+    "settings"   => [
         "database" => "../database",
         "bot"      => "#",
         "ssh"      => "../ssh",
@@ -31,6 +32,7 @@ $nav = [
 $active = [
     "info"       => "",
     "bots"       => "",
+    "createuser" => "",
     "settings_s" => "active",
     "settings"   => [
         "database" => "",

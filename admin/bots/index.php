@@ -3,7 +3,6 @@
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
 use patrick115\Sinusbot\Sinusbot;
-use patrick115\Sinusbot\Stats;
 include "../../src/Class.php";
 
 if (!Session::get("logged")) {
@@ -11,9 +10,10 @@ if (!Session::get("logged")) {
 }
 
 $nav = [
-    "info"     => "../",
-    "bots"     => "#",
-    "settings" => [
+    "info"       => "../",
+    "bots"       => "#",
+    "createuser" => "../addusr",
+    "settings"   => [
         "database" => "../settings/database",
         "bot"      => "../settings/bot",
         "ssh"      => "../settings/ssh",
@@ -24,6 +24,7 @@ $nav = [
 $active = [
     "info"       => "",
     "bots"       => "active",
+    "createuser" => "",
     "settings_s" => "",
     "settings"   => [
         "database" => "",

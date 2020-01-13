@@ -14,9 +14,9 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#HERE PHP $nav['createuser']#" class="nav-link #HERE PHP $active['createuser']#">
-                <i class="fas fa-user-plus"></i>
-                <p>Create User</p>
+            <a href="<?=$nav["createuser"]?>" class="nav-link <?=$active['createuser']?>">
+                <i class="fas fa-users"></i>
+                <p>User list</p>
             </a>
         </li>
         <li class="nav-item has-treeview <?php if (!empty($active["settings_s"])) echo "menu-open" ?>">

@@ -13,16 +13,17 @@ if (!Session::get("logged")) {
 $db = [
     "host"     => Config::init()->getConfig("Database/address"),
     "username" => Config::init()->getConfig("Database/username"),
-    "password" =>   Main::hide(Config::init()->getConfig("Database/password")),
+    "password" => Main::hide(Config::init()->getConfig("Database/password")),
     "database" => Config::init()->getConfig("Database/database"),
     "port"     => Config::init()->getConfig("Database/port"),
     "prefix"   => Config::init()->getConfig("Database/prefix"),
 ];
 
 $nav = [
-    "info"     => "../../",
-    "bots"     => "../../bots",
-    "settings" => [
+    "info"       => "../../",
+    "bots"       => "../../bots",
+    "createuser" => "../../addusr",
+    "settings"   => [
         "database" => "#",
         "bot"      => "../bot",
         "ssh"      => "../ssh",
@@ -33,6 +34,7 @@ $nav = [
 $active = [
     "info"       => "",
     "bots"       => "",
+    "createuser" => "",
     "settings_s" => "active",
     "settings"   => [
         "database" => "active",
@@ -50,7 +52,7 @@ $active = [
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Settings | <?= $_SERVER['SERVER_NAME'] ?></title>
+    <title>Settings | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -97,7 +99,7 @@ $active = [
                         <img src="../../../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a class="d-block"><?= Session::get("username") ?></a>
+                        <a class="d-block"><?=Session::get("username")?></a>
                     </div>
                 </div>
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
@@ -140,41 +142,41 @@ $active = [
                     <div class="card-body">
                     <h2>Database</h2>
                         <?php if (!isset($_GET["edit"])): ?>
-                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["host"] ?></code></h5>
-                        <h5>Port:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["port"] ?></code></h5>
-                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["username"] ?></code></h5>
-                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["password"] ?></code></h5>
-                        <h5>Database: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["database"] ?></code></h5>
-                        <h5>Table Prefix: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?= $db["prefix"] ?></code></h5>
+                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["host"]?></code></h5>
+                        <h5>Port:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["port"]?></code></h5>
+                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["username"]?></code></h5>
+                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["password"]?></code></h5>
+                        <h5>Database: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["database"]?></code></h5>
+                        <h5>Table Prefix: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["prefix"]?></code></h5>
                         <a href="./?edit"><button type="button" class="btn btn-primary">Edit</button></a>
                         <?php else: ?>
                         <?php if (isset($_GET["error"])): ?>
-                            <h4 style="color:red"><?= Main::Chars($_GET["error"]) ?></h4>
-                        <?php endif; ?>
+                            <h4 style="color:red"><?=Main::Chars($_GET["error"])?></h4>
+                        <?php endif;?>
                         <form action="./proceed.php" method="post">
                         <div class="form-group">
                             <label for="host">Host</label>
-                            <input type="text" class="form-control" id="host" value="<?= $db["host"] ?>" name="host" required>
+                            <input type="text" class="form-control" id="host" value="<?=$db["host"]?>" name="host" required>
                         </div>
                         <div class="form-group">
                             <label for="port">Port</label>
-                            <input type="number" class="form-control" id="port" value="<?= $db["port"] ?>" name="port" required>
+                            <input type="number" class="form-control" id="port" value="<?=$db["port"]?>" name="port" required>
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" value="<?= $db["username"] ?>" name="username" required>
+                            <input type="text" class="form-control" id="username" value="<?=$db["username"]?>" name="username" required>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="text" class="form-control" id="password" value="<?= $db["password"] ?>" name="password" required>
+                            <input type="text" class="form-control" id="password" value="<?=$db["password"]?>" name="password" required>
                         </div>
                         <div class="form-group">
                             <label for="database">Database</label>
-                            <input type="text" class="form-control" id="database" value="<?= $db["database"] ?>" name="database" required>
+                            <input type="text" class="form-control" id="database" value="<?=$db["database"]?>" name="database" required>
                         </div>
                         <div class="form-group">
                             <label for="prefix">Table Prefix</label>
-                            <input type="text" class="form-control" id="prefix" value="<?= $db["prefix"] ?>" name="prefix" required>
+                            <input type="text" class="form-control" id="prefix" value="<?=$db["prefix"]?>" name="prefix" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Update</button>
                         <a href="./"><button type="button" class="btn btn-primary">Back</button></a>

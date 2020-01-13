@@ -2,8 +2,15 @@
 
 use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
+use patrick115\Sinusbot\Session;
 
 include "../../../src/Class.php";
+
+if (empty(Session::get("logged")))
+{
+    header("HTTP/1.0 404 Not Found");
+    exit;
+}
 
 if (empty($_POST)) {
     Main::Redirect("./?edit&error=Post is empty");

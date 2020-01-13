@@ -1,42 +1,37 @@
 <?php
 
-use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
+use patrick115\Sinusbot\Sinusbot;
+use patrick115\Sinusbot\Stats;
 
-include "../../../src/Class.php";
+include "../../src/Class.php";
 
 if (!Session::get("logged")) {
-    Main::Redirect("login");
+    Main::Redirect("../login?back=addusr");
 }
 
-$db = [
-    "host"     => Config::init()->getConfig("SSH/sshaddress"),
-    "username" => Config::init()->getConfig("SSH/sshusername"),
-    "password" => Main::hide(Config::init()->getConfig("SSH/sshpassword")),
-];
-
 $nav = [
-    "info"     => "../../",
-    "bots"     => "../../bots",
-    "createuser" => "../../addusr",
-    "settings" => [
-        "database" => "../database",
-        "bot"      => "../bot",
-        "ssh"      => "#",
-        "other"    => "../other",
+    "info"       => "../",
+    "bots"       => "../bots",
+    "createuser" => "#",
+    "settings"   => [
+        "database" => "../settings/database",
+        "bot"      => "../settings/bot",
+        "ssh"      => "../settings/ssh",
+        "other"    => "../settings/other",
     ],
 ];
 
 $active = [
     "info"       => "",
     "bots"       => "",
-    "createuser" => "",
-    "settings_s" => "active",
+    "createuser" => "active",
+    "settings_s" => "",
     "settings"   => [
         "database" => "",
         "bot"      => "",
-        "ssh"      => "active",
+        "ssh"      => "",
         "other"    => "",
     ],
 ];
@@ -49,20 +44,20 @@ $active = [
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Settings | <?=$_SERVER['SERVER_NAME']?></title>
+    <title>Info | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- overlayScrollbars -->
-    <link rel="stylesheet" href="../../css/adminlte.min.css">
+    <link rel="stylesheet" href="../css/adminlte.min.css">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <!-- Favicon -->
-    <link rel="shortcut icon" href="../../../images/avatar.png" type="image/x-icon">
+    <link rel="shortcut icon" href="../../images/avatar.png" type="image/x-icon">
 </head>
 
 <body class="hold-transition sidebar-mini">
@@ -83,7 +78,7 @@ $active = [
             <!-- Sidebar -->
             <!-- Brand Logo -->
             <a href="#" class="brand-link">
-                <img src="../../../images/avatar.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                <img src="../../images/avatar.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
                     style="opacity: .8">
                 <span class="brand-text font-weight-light">SinusBot</span>
             </a>
@@ -93,7 +88,7 @@ $active = [
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="../../../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
+                        <img src="../../images/empty_user_icon_256.v2.png" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
                         <a class="d-block"><?=Session::get("username")?></a>
@@ -110,7 +105,7 @@ $active = [
                 </div>
 
                 <!-- Sidebar Menu -->
-                <?php include MainDir . "/src/includes/sidebar.php"; ?>
+                <?php include MainDir . "/src/includes/sidebar.php"?>
                 <!-- /.sidebar-menu -->
             </div>
             <!-- /.sidebar -->
@@ -123,7 +118,7 @@ $active = [
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Settings ➤ SSH</h1>
+                            <h1>Users</h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -137,34 +132,10 @@ $active = [
             <section class="content">
                 <div class="card">
                     <div class="card-body">
-                    <h2>SSH</h2>
-                        <?php if (!isset($_GET["edit"])): ?>
-                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["host"]?></code></h5>
-                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["username"]?></code></h5>
-                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["password"]?></code></h5>
-                        <a href="./?edit"><button type="button" class="btn btn-primary">Edit</button></a>
-                        <?php else: ?>
-                        <?php if (isset($_GET["error"])): ?>
-                            <h4 style="color:red"><?=Main::Chars($_GET["error"])?></h4>
-                        <?php endif;?>
-                        <form action="./proceed.php" method="post">
-                        <div class="form-group">
-                            <label for="host">Host</label>
-                            <input type="text" class="form-control" id="host" value="<?=$db["host"]?>" name="host" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" value="<?=$db["username"]?>" name="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="text" class="form-control" id="password" value="<?=$db["password"]?>" name="password" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Update</button>
-                        <a href="./"><button type="button" class="btn btn-primary">Back</button></a>
-                        </form>
-                        <?php endif;?>
+                        <a href="./invite">
+                            <button type="button" class="btn btn-success" style="float:right;margin-right:2%;">Add User</button>
+                        </a>
+                        <?= Stats::init()->getUserList() ?>
                     </div>
                 </div>
             </section>
@@ -194,19 +165,20 @@ $errors->returnError();
 ?>
 
 <!-- jQuery -->
-<script src="../../plugins/jquery/jquery.min.js"></script>
+<script src="../plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="../../plugins/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="../plugins/bootstrap/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
-<script src="../../plugins/adminlte/adminlte.min.js"></script>
+<script src="../plugins/adminlte/adminlte.min.js"></script>
 <!-- Sweat Alerts 2-->
-<script src="../../plugins/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="../plugins/sweetalert2/sweetalert2.all.min.js"></script>
 <!-- Data Tables-->
-<script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
-<script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+<script src="../plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="../plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
 <!-- Year Script -->
 <script>
 $('#year').text(new Date().getFullYear());
 </script>
 
 </html>
+

@@ -1,45 +1,46 @@
 <?php
 
-use patrick115\Sinusbot\Config;
 use patrick115\Sinusbot\Main;
 use patrick115\Sinusbot\Session;
+use patrick115\Sinusbot\Sinusbot;
+use patrick115\Sinusbot\Stats;
 
 include "../../../src/Class.php";
 
 if (!Session::get("logged")) {
-    Main::Redirect("login");
+    Main::Redirect("../../login?back=addusr/invite");
 }
 
-$db = [
-    "host"     => Config::init()->getConfig("SSH/sshaddress"),
-    "username" => Config::init()->getConfig("SSH/sshusername"),
-    "password" => Main::hide(Config::init()->getConfig("SSH/sshpassword")),
-];
-
 $nav = [
-    "info"     => "../../",
-    "bots"     => "../../bots",
-    "createuser" => "../../addusr",
-    "settings" => [
-        "database" => "../database",
-        "bot"      => "../bot",
-        "ssh"      => "#",
-        "other"    => "../other",
+    "info"       => "../../",
+    "bots"       => "../../bots",
+    "createuser" => "../",
+    "settings"   => [
+        "database" => "../../settings/database",
+        "bot"      => "../../settings/bot",
+        "ssh"      => "../../settings/ssh",
+        "other"    => "../../settings/other",
     ],
 ];
 
 $active = [
     "info"       => "",
     "bots"       => "",
-    "createuser" => "",
-    "settings_s" => "active",
+    "createuser" => "active",
+    "settings_s" => "",
     "settings"   => [
         "database" => "",
         "bot"      => "",
-        "ssh"      => "active",
+        "ssh"      => "",
         "other"    => "",
     ],
 ];
+
+if (isset($_GET["key"]) || isset($_GET["for"]) || isset($_GET["message"])) {
+    if (empty($_GET["key"]) || empty($_GET["for"]) || empty($_GET["message"])) {
+        Main::Redirect("./?e=Incomplete invitation");
+    }
+}
 
 ?>
 
@@ -49,7 +50,7 @@ $active = [
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Settings | <?=$_SERVER['SERVER_NAME']?></title>
+    <title>Info | <?=$_SERVER['SERVER_NAME']?></title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -110,7 +111,7 @@ $active = [
                 </div>
 
                 <!-- Sidebar Menu -->
-                <?php include MainDir . "/src/includes/sidebar.php"; ?>
+                <?php include MainDir . "/src/includes/sidebar.php"?>
                 <!-- /.sidebar-menu -->
             </div>
             <!-- /.sidebar -->
@@ -123,7 +124,7 @@ $active = [
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Settings ➤ SSH</h1>
+                            <h1></h1>
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -135,38 +136,45 @@ $active = [
 
             <!-- Main content -->
             <section class="content">
-                <div class="card">
-                    <div class="card-body">
-                    <h2>SSH</h2>
-                        <?php if (!isset($_GET["edit"])): ?>
-                        <h5>Host:     <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["host"]?></code></h5>
-                        <h5>Username: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["username"]?></code></h5>
-                        <h5>Password: <code style="background-color: #dedede;border-radius: 4px;padding: 3px 6px 3px 6px;"><?=$db["password"]?></code></h5>
-                        <a href="./?edit"><button type="button" class="btn btn-primary">Edit</button></a>
-                        <?php else: ?>
-                        <?php if (isset($_GET["error"])): ?>
-                            <h4 style="color:red"><?=Main::Chars($_GET["error"])?></h4>
-                        <?php endif;?>
-                        <form action="./proceed.php" method="post">
-                        <div class="form-group">
-                            <label for="host">Host</label>
-                            <input type="text" class="form-control" id="host" value="<?=$db["host"]?>" name="host" required>
+                <center>
+                    <div class="card" style="max-width: 40%;width: 40%;">
+                        <div class="card-body">
+                            <?php if (empty($_GET["key"])): ?>
+                            <h2>Create Invite Code</h1>
+                            <h8 style="color:red">* required</h8>
+                            <?php if (isset($_GET["e"])) echo "<h3 style=\"color:red\">" . Main::Chars($_GET["e"]) . "</h3>" ?>
+                            <form action="./create.php" method="post">
+                                <div class="form-group">
+                                    <label for="username">Username<span style="color:red">*</span></label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="message">Message</label>
+                                    <textarea type="text" class="form-control" id="message" name="message"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </form>
+                            <?php else: ?>
+                            <h2>Invite</h2>
+                            <h5>For: <?= Main::Chars($_GET["for"]) ?></h5>
+                            <h5>Message: <?= Main::Chars($_GET["message"]) ?></h5>
+                            <h5>Key: <?= Main::Chars($_GET["key"]) ?></h5>
+                            <h5>Invitation link:</h5>
+                            <h6><a target="__blank" href="http://<?php $link = $_SERVER["SERVER_NAME"] . str_replace(
+                                [
+                                    "/admin/addusr/invite/?key={$_GET["key"]}&for={$_GET["for"]}&message={$_GET["message"]}",
+                                    "/admin/addusr/invite/index.php?key={$_GET["key"]}&for={$_GET["for"]}&message={$_GET["message"]}"
+                                ], [
+                                    "", 
+                                    ""
+                                ], 
+                                urldecode($_SERVER["REQUEST_URI"])
+                                ) . "/invitation/?key=" . Main::Chars($_GET["key"]); echo $link; ?>"><?php
+                            echo $link; ?></h6>
+                            <?php endif; ?>
                         </div>
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" value="<?=$db["username"]?>" name="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="text" class="form-control" id="password" value="<?=$db["password"]?>" name="password" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Update</button>
-                        <a href="./"><button type="button" class="btn btn-primary">Back</button></a>
-                        </form>
-                        <?php endif;?>
                     </div>
-                </div>
+                </center>
             </section>
             <!-- /.content -->
         </div>
@@ -210,3 +218,4 @@ $('#year').text(new Date().getFullYear());
 </script>
 
 </html>
+

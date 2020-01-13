@@ -74,7 +74,7 @@ class Sinusbot extends Error
             $return .= "</tbody></table>";
             return $return;
         } else {
-            return "<h2 style=\"color:red\">No bots found, create new</h2>";
+            return "<h2 style=\"color:red\">No bots found, create one.</h2>";
         }
     }
     private static function convertStatus($status)

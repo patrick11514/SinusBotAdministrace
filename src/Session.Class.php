@@ -13,6 +13,7 @@
 namespace patrick115\Sinusbot;
 
 use patrick115\Sinusbot\Error;
+use patrick115\Sinusbot\Main;
 
 class Session extends Error
 {
@@ -46,7 +47,7 @@ class Session extends Error
         }
 
         if (isset($_SESSION[$param])) {
-            return $_SESSION[$param];
+            return Main::Chars($_SESSION[$param]);
         }
         return false;
     }

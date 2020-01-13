@@ -278,4 +278,25 @@ class Main extends Database
             return;
         }
     }
+    public function getIDByUser($user, $catch = true)
+    {
+        $id = Database::init()->select(["id"], "users", "LIMIT 1", "username", $user);
+        if (Database::init()->num_rows($id) > 0) {
+            return $id->fetch_object()->id;
+        } else {
+            if ($catch === true) {
+                Error::init()->catchError("User with username $user not found", debug_backtrace());
+            }
+            return;
+
+        }
+    }
+    public function userExist($id)
+    {
+        $check = Database::init()->select(["username"], "users", "LIMIT 1", "id", $id);
+        if (Database::init()->num_rows($check) > 0) {
+            return true;
+        }
+        return false;
+    }
 }
